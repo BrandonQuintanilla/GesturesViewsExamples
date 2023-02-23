@@ -14,13 +14,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <com.experimental.gestures.SwipeButton
+            android:id="@+id/seekbar_button_status_1"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginBottom="-2dp"
+            app:button_background="@drawable/shape_button_squared"
+            app:button_bottom_padding="26dp"
+            app:button_image_disabled="@drawable/swipe_btn_arrow"
+            app:button_image_enabled="@drawable/swipe_btn_arrow"
+            app:button_left_padding="26dp"
+            app:button_right_padding="26dp"
+            app:button_top_padding="35dp"
+            app:button_trail_enabled="true"
+            app:has_activate_state="true"
+            app:initial_state="disabled"
+            app:inner_text="SWIPE TO ACTIVATE"
+            app:inner_text_background="@drawable/shape_squared"
+            app:inner_text_bottom_padding="27dp"
+            app:inner_text_color="@android:color/white"
+            app:inner_text_left_padding="70dp"
+            app:inner_text_size="22sp"
+            app:inner_text_top_padding="27dp" />
+        <!--
         <com.experimental.gestures.DraggableBouncingView
             android:id="@+id/drag_view"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
             android:background="@color/purple_200" />
-        <!--
+
                 <com.experimental.gestures.DraggableView
                     android:id="@+id/drag_view"
                     android:layout_width="50dp"
