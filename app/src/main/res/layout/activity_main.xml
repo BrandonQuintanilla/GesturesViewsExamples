@@ -61,6 +61,11 @@
             app:lay_inner_text_size="22sp"
             app:lay_inner_text_top_padding="27dp">
 
+            <ImageView
+                android:layout_width="70dp"
+                android:background="@color/purple_200"
+                android:layout_height="match_parent" />
+
         </com.experimental.gestures.component.SwipeLayout>
 
         <FrameLayout

@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import com.experimental.gestures.R
 
 /**
@@ -22,6 +23,7 @@ import com.experimental.gestures.R
 class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
 ) : FrameLayout(ctx, attrs) {
+
     private var swipeButtonInner: ImageView? = null
     private var initialX = 0f
     var isActive = false
@@ -50,6 +52,11 @@ class SwipeLayout @JvmOverloads constructor(
         background!!.background = drawable
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        swipeButtonInner = children.find { it is ImageView } as? ImageView
+    }
+
     private fun setup(
         context: Context,
         attrs: AttributeSet?
@@ -71,8 +78,8 @@ class SwipeLayout @JvmOverloads constructor(
         )
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
         background!!.addView(centerText, layoutParams)
-        val swipeButton = ImageView(context)
-        swipeButtonInner = swipeButton
+        //val swipeButton = ImageView(context)
+        //swipeButtonInner = swipeButton
 
         val typedArray = context.obtainStyledAttributes(
             attrs, R.styleable.SwipeLayout
@@ -155,16 +162,16 @@ class SwipeLayout @JvmOverloads constructor(
             )
             layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
             layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-            swipeButtonInner!!.setImageDrawable(enabledDrawable)
-            addView(swipeButtonInner, layoutParamsButton)
+            //swipeButtonInner!!.setImageDrawable(enabledDrawable)
+            //addView(swipeButtonInner, layoutParamsButton)
             isActive = true
         } else {
             val layoutParamsButton =
                 RelativeLayout.LayoutParams(collapsedWidth, collapsedHeight)
             layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
             layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-            swipeButtonInner!!.setImageDrawable(disabledDrawable)
-            addView(swipeButtonInner, layoutParamsButton)
+            //swipeButtonInner!!.setImageDrawable(disabledDrawable)
+            //addView(swipeButtonInner, layoutParamsButton)
             isActive = false
         }
         centerText.setPadding(
@@ -176,12 +183,9 @@ class SwipeLayout @JvmOverloads constructor(
         val buttonBackground =
             typedArray.getDrawable(R.styleable.SwipeButton_button_background)
         if (buttonBackground != null) {
-            swipeButtonInner!!.background = buttonBackground
+            //swipeButtonInner!!.background = buttonBackground
         } else {
-            swipeButtonInner!!.background = ContextCompat.getDrawable(
-                context,
-                R.drawable.shape_button
-            )
+            //swipeButtonInner!!.background = ContextCompat.getDrawable(context, R.drawable.shape_button)
         }
         buttonLeftPadding =
             typedArray.getDimension(R.styleable.SwipeButton_button_left_padding, 0f)
@@ -191,12 +195,12 @@ class SwipeLayout @JvmOverloads constructor(
             typedArray.getDimension(R.styleable.SwipeButton_button_right_padding, 0f)
         buttonBottomPadding =
             typedArray.getDimension(R.styleable.SwipeButton_button_bottom_padding, 0f)
-        swipeButtonInner!!.setPadding(
+        /*swipeButtonInner!!.setPadding(
             buttonLeftPadding.toInt(),
             buttonTopPadding.toInt(),
             buttonRightPadding.toInt(),
             buttonBottomPadding.toInt()
-        )
+        )*/
         hasActivationState =
             typedArray.getBoolean(R.styleable.SwipeButton_has_activate_state, true)
         typedArray.recycle()
