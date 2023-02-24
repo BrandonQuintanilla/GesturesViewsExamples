@@ -2,7 +2,6 @@ package com.experimental.gestures.component
 
 import android.animation.*
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -23,11 +22,9 @@ import com.experimental.gestures.R
 /**
  * Created by Brandon Quintanilla on Feb/23/2023
  */
-interface OnStateChangeListener {
-    fun onStateChange(active: Boolean)
-}
 
 interface OnActiveListener {
+    // Executed when the button is completely activated
     fun onActive()
 }
 
@@ -40,7 +37,6 @@ class SwipeButton : RelativeLayout {
     private var background: ViewGroup? = null
     private var disabledDrawable: Drawable? = null
     private var enabledDrawable: Drawable? = null
-    private var onStateChangeListener: OnStateChangeListener? = null
     private var onActiveListener: OnActiveListener? = null
     private var collapsedWidth = 0
     private var collapsedHeight = 0
@@ -71,66 +67,8 @@ class SwipeButton : RelativeLayout {
         init(context, attrs, defStyleAttr, -1)
     }
 
-    @TargetApi(21)
-    constructor(
-        context: Context,
-        attrs: AttributeSet?,
-        defStyleAttr: Int,
-        defStyleRes: Int
-    ) : super(context, attrs, defStyleAttr, defStyleRes) {
-        init(context, attrs, defStyleAttr, defStyleRes)
-    }
-
-    fun setText(text: String?) {
-        centerText!!.text = text
-    }
-
     override fun setBackground(drawable: Drawable) {
         background!!.background = drawable
-    }
-
-    fun setSlidingButtonBackground(drawable: Drawable?) {
-        background!!.background = drawable
-    }
-
-    fun setDisabledDrawable(drawable: Drawable?) {
-        disabledDrawable = drawable
-        if (!isActive) {
-            swipeButtonInner!!.setImageDrawable(drawable)
-        }
-    }
-
-    fun setButtonBackground(buttonBackground: Drawable?) {
-        if (buttonBackground != null) {
-            swipeButtonInner!!.background = buttonBackground
-        }
-    }
-
-    fun setEnabledDrawable(drawable: Drawable?) {
-        enabledDrawable = drawable
-        if (isActive) {
-            swipeButtonInner!!.setImageDrawable(drawable)
-        }
-    }
-
-    fun setOnStateChangeListener(onStateChangeListener: OnStateChangeListener?) {
-        this.onStateChangeListener = onStateChangeListener
-    }
-
-    fun setOnActiveListener(onActiveListener: OnActiveListener?) {
-        this.onActiveListener = onActiveListener
-    }
-
-    fun setInnerTextPadding(left: Int, top: Int, right: Int, bottom: Int) {
-        centerText!!.setPadding(left, top, right, bottom)
-    }
-
-    fun setSwipeButtonPadding(left: Int, top: Int, right: Int, bottom: Int) {
-        swipeButtonInner!!.setPadding(left, top, right, bottom)
-    }
-
-    fun setHasActivationState(hasActivationState: Boolean) {
-        this.hasActivationState = hasActivationState
     }
 
     private fun init(
@@ -208,7 +146,7 @@ class SwipeButton : RelativeLayout {
                     Color.WHITE
                 )
             )
-            val textSize = converPixelsToSp(
+            val textSize = convertPixelsToSp(
                 typedArray.getDimension(R.styleable.SwipeButton_inner_text_size, 0f), context
             )
             if (textSize != 0f) {
@@ -368,9 +306,7 @@ class SwipeButton : RelativeLayout {
                 super.onAnimationEnd(animation)
                 isActive = true
                 swipeButtonInner!!.setImageDrawable(enabledDrawable)
-                if (onStateChangeListener != null) {
-                    onStateChangeListener!!.onStateChange(isActive)
-                }
+
                 if (onActiveListener != null) {
                     onActiveListener!!.onActive()
                 }
@@ -425,9 +361,7 @@ class SwipeButton : RelativeLayout {
                 super.onAnimationEnd(animation)
                 isActive = false
                 swipeButtonInner!!.setImageDrawable(disabledDrawable)
-                if (onStateChangeListener != null) {
-                    onStateChangeListener!!.onStateChange(isActive)
-                }
+
                 if (layer != null) {
                     layer!!.visibility = View.GONE
                 }
@@ -437,32 +371,6 @@ class SwipeButton : RelativeLayout {
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(objectAnimator, widthAnimator)
         animatorSet.start()
-    }
-
-    fun setEnabledStateNotAnimated() {
-        swipeButtonInner!!.x = 0f
-        val params = swipeButtonInner!!.layoutParams
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT
-        swipeButtonInner!!.layoutParams = params
-        swipeButtonInner!!.setImageDrawable(enabledDrawable)
-        isActive = true
-        centerText!!.alpha = 0f
-    }
-
-    fun setDisabledStateNotAnimated() {
-        val params = swipeButtonInner!!.layoutParams
-        params.width = ViewGroup.LayoutParams.WRAP_CONTENT
-        collapsedWidth = ViewGroup.LayoutParams.WRAP_CONTENT
-        swipeButtonInner!!.setImageDrawable(disabledDrawable)
-        isActive = false
-        centerText!!.alpha = 1f
-        swipeButtonInner!!.setPadding(
-            buttonLeftPadding.toInt(),
-            buttonTopPadding.toInt(),
-            buttonRightPadding.toInt(),
-            buttonBottomPadding.toInt()
-        )
-        swipeButtonInner!!.layoutParams = params
     }
 
     private fun setTrailingEffect() {
@@ -475,31 +383,13 @@ class SwipeButton : RelativeLayout {
         }
     }
 
-    fun setTrailBackground(trailingDrawable: Drawable) {
-        if (trailEnabled) {
-            layer!!.background = trailingDrawable
-        }
-    }
-
-    fun toggleState() {
-        if (isActive) {
-            collapseButton()
-        } else {
-            expandButton()
-        }
-    }
-
-    fun setCenterTextColor(context: Context, color: Int) {
-        centerText!!.setTextColor(context.resources.getColor(color))
-    }
-
     companion object {
         private const val ENABLED = 0
         private const val DISABLED = 1
     }
 }
 
-fun converPixelsToSp(px: Float, context: Context): Float {
+fun convertPixelsToSp(px: Float, context: Context): Float {
     return px / context.resources.displayMetrics.scaledDensity
 }
 
