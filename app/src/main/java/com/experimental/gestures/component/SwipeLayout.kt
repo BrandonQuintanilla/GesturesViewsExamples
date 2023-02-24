@@ -39,9 +39,6 @@ class SwipeLayout @JvmOverloads constructor(
                     initialXEvent = event.x
                 }
 
-                //attach to center
-                //swipeButtonInner!!.x = event.x - swipeButtonInner!!.width / 2
-
                 //attach to touch point
                 childView!!.x = event.x - initialXEvent
 

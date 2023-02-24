@@ -42,30 +42,12 @@
             android:id="@+id/lay_swipe"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:layout_marginBottom="-2dp"
-            app:lay_button_background="@drawable/shape_button_squared"
-            app:lay_button_bottom_padding="26dp"
-            app:lay_button_image_disabled="@drawable/swipe_btn_arrow"
-            app:lay_button_image_enabled="@drawable/swipe_btn_arrow"
-            app:lay_button_left_padding="26dp"
-            app:lay_button_right_padding="26dp"
-            app:lay_button_top_padding="35dp"
-            app:lay_button_trail_enabled="true"
-            app:lay_has_activate_state="true"
-            app:lay_initial_state="disabled"
-            app:lay_inner_text="!!LAYOUT!!"
-            android:layout_marginHorizontal="40dp"
-            app:lay_inner_text_background="@drawable/shape_squared"
-            app:lay_inner_text_bottom_padding="27dp"
-            app:lay_inner_text_color="@android:color/white"
-            app:lay_inner_text_left_padding="70dp"
-            app:lay_inner_text_size="22sp"
-            app:lay_inner_text_top_padding="27dp">
+            android:layout_marginHorizontal="40dp">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="match_parent"
-                android:background="@color/purple_200"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:background="@color/purple_200" />
 
         </com.experimental.gestures.component.SwipeLayout>
 
