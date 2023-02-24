@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import com.experimental.gestures.R
 
@@ -30,15 +29,12 @@ class SwipeLayout @JvmOverloads constructor(
     var isActive = false
         private set
 
-
-    private var centerText: TextView? = null
-    private var background: ViewGroup? = null
     private var disabledDrawable: Drawable? = null
     private var enabledDrawable: Drawable? = null
     private var onActiveListener: OnActiveListener? = null
     private var collapsedWidth = 0
     private var collapsedHeight = 0
-    private var layer: LinearLayout? = null
+
     private var trailEnabled = false
     private var hasActivationState = false
     private var buttonLeftPadding = 0f
@@ -46,13 +42,8 @@ class SwipeLayout @JvmOverloads constructor(
     private var buttonRightPadding = 0f
     private var buttonBottomPadding = 0f
 
-
     init {
         setup(ctx, attrs)
-    }
-
-    override fun setBackground(drawable: Drawable) {
-        background!!.background = drawable
     }
 
     override fun onAttachedToWindow() {
@@ -65,25 +56,18 @@ class SwipeLayout @JvmOverloads constructor(
         attrs: AttributeSet?
     ) {
         hasActivationState = true
-        background = RelativeLayout(context)
         val layoutParamsView = RelativeLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
         layoutParamsView.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-        addView(background, layoutParamsView)
         val centerText = TextView(context)
-        this.centerText = centerText
         centerText.gravity = Gravity.CENTER
         val layoutParams = RelativeLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-        background!!.addView(centerText, layoutParams)
-        //val swipeButton = ImageView(context)
-        //swipeButtonInner = swipeButton
-
         val typedArray = context.obtainStyledAttributes(
             attrs, R.styleable.SwipeLayout
         )
@@ -99,32 +83,6 @@ class SwipeLayout @JvmOverloads constructor(
             R.styleable.SwipeLayout_lay_button_trail_enabled,
             false
         )
-        val trailingDrawable =
-            typedArray.getDrawable(R.styleable.SwipeLayout_lay_button_trail_drawable)
-        val backgroundDrawable =
-            typedArray.getDrawable(R.styleable.SwipeLayout_lay_inner_text_background)
-        if (backgroundDrawable != null) {
-            background!!.setBackground(backgroundDrawable)
-        } else {
-            background!!.setBackground(
-                ContextCompat.getDrawable(
-                    context,
-                    R.drawable.shape_rounded
-                )
-            )
-        }
-        if (trailEnabled) {
-            layer = LinearLayout(context)
-            if (trailingDrawable != null) {
-                layer!!.background = trailingDrawable
-            } else {
-                layer!!.background =
-                    typedArray.getDrawable(R.styleable.SwipeLayout_lay_button_background)
-            }
-            layer!!.gravity = Gravity.START
-            layer!!.visibility = View.GONE
-            background!!.addView(layer, layoutParamsView)
-        }
         centerText.text = typedArray.getText(R.styleable.SwipeLayout_lay_inner_text)
         centerText.setTextColor(
             typedArray.getColor(
@@ -165,16 +123,12 @@ class SwipeLayout @JvmOverloads constructor(
             )
             layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
             layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-            //swipeButtonInner!!.setImageDrawable(enabledDrawable)
-            //addView(swipeButtonInner, layoutParamsButton)
             isActive = true
         } else {
             val layoutParamsButton =
                 RelativeLayout.LayoutParams(collapsedWidth, collapsedHeight)
             layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
             layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-            //swipeButtonInner!!.setImageDrawable(disabledDrawable)
-            //addView(swipeButtonInner, layoutParamsButton)
             isActive = false
         }
         centerText.setPadding(
@@ -183,13 +137,6 @@ class SwipeLayout @JvmOverloads constructor(
             innerTextRightPadding.toInt(),
             innerTextBottomPadding.toInt()
         )
-        val buttonBackground =
-            typedArray.getDrawable(R.styleable.SwipeButton_button_background)
-        if (buttonBackground != null) {
-            //swipeButtonInner!!.background = buttonBackground
-        } else {
-            //swipeButtonInner!!.background = ContextCompat.getDrawable(context, R.drawable.shape_button)
-        }
         buttonLeftPadding =
             typedArray.getDimension(R.styleable.SwipeButton_button_left_padding, 0f)
         buttonTopPadding =
@@ -198,12 +145,6 @@ class SwipeLayout @JvmOverloads constructor(
             typedArray.getDimension(R.styleable.SwipeButton_button_right_padding, 0f)
         buttonBottomPadding =
             typedArray.getDimension(R.styleable.SwipeButton_button_bottom_padding, 0f)
-        /*swipeButtonInner!!.setPadding(
-            buttonLeftPadding.toInt(),
-            buttonTopPadding.toInt(),
-            buttonRightPadding.toInt(),
-            buttonBottomPadding.toInt()
-        )*/
         hasActivationState =
             typedArray.getBoolean(R.styleable.SwipeButton_has_activate_state, true)
         typedArray.recycle()
@@ -232,9 +173,6 @@ class SwipeLayout @JvmOverloads constructor(
                             event.x + swipeButtonInner!!.width / 2 < width
                         ) {
                             swipeButtonInner!!.x = event.x - swipeButtonInner!!.width / 2
-                            centerText!!.alpha =
-                                1 - 1.3f * (swipeButtonInner!!.x + swipeButtonInner!!.width) / width
-                            setTrailingEffect()
                         }
                         if (event.x + swipeButtonInner!!.width / 2 > width &&
                             swipeButtonInner!!.x + swipeButtonInner!!.width / 2 < width
@@ -251,12 +189,8 @@ class SwipeLayout @JvmOverloads constructor(
                             collapseButton()
                         } else {
                             if (swipeButtonInner!!.x + swipeButtonInner!!.width > width * 0.9) {
-                                if (hasActivationState) {
-                                    expandButton()
-                                } else if (onActiveListener != null) {
-                                    onActiveListener!!.onActive()
-                                    moveButtonBack()
-                                }
+                                onActiveListener?.onActive()
+                                moveButtonBack()
                             } else {
                                 moveButtonBack()
                             }
@@ -268,65 +202,22 @@ class SwipeLayout @JvmOverloads constructor(
             }
         }
 
-    private fun expandButton() {
-        val positionAnimator = ValueAnimator.ofFloat(swipeButtonInner!!.x, 0f)
-        positionAnimator.addUpdateListener {
-            val x = positionAnimator.animatedValue as Float
-            swipeButtonInner!!.x = x
-        }
-        val widthAnimator = ValueAnimator.ofInt(
-            swipeButtonInner!!.width,
-            width
-        )
-        widthAnimator.addUpdateListener {
-            val params = swipeButtonInner!!.layoutParams
-            params.width = (widthAnimator.animatedValue as Int)
-            swipeButtonInner!!.layoutParams = params
-        }
-        val animatorSet = AnimatorSet()
-        animatorSet.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                super.onAnimationEnd(animation)
-                isActive = true
-                swipeButtonInner!!.setImageDrawable(enabledDrawable)
-
-                if (onActiveListener != null) {
-                    onActiveListener!!.onActive()
-                }
-            }
-        })
-        animatorSet.playTogether(positionAnimator, widthAnimator)
-        animatorSet.start()
-    }
-
-    @SuppressLint("ObjectAnimatorBinding")
     private fun moveButtonBack() {
         val positionAnimator = ValueAnimator.ofFloat(swipeButtonInner!!.x, 0f)
         positionAnimator.interpolator = AccelerateDecelerateInterpolator()
         positionAnimator.addUpdateListener {
             val x = positionAnimator.animatedValue as Float
             swipeButtonInner!!.x = x
-            setTrailingEffect()
         }
-        positionAnimator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                super.onAnimationEnd(animation)
-                if (layer != null) {
-                    layer!!.visibility = View.GONE
-                }
-            }
-        })
-        val objectAnimator = ObjectAnimator.ofFloat(centerText, "alpha", 1f)
         positionAnimator.duration = 200
         val animatorSet = AnimatorSet()
-        animatorSet.playTogether(objectAnimator, positionAnimator)
+        animatorSet.playTogether(positionAnimator)
         animatorSet.start()
     }
 
     @SuppressLint("ObjectAnimatorBinding")
     private fun collapseButton() {
-        val finalWidth: Int
-        finalWidth = if (collapsedWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
+        val finalWidth: Int = if (collapsedWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
             swipeButtonInner!!.height
         } else {
             collapsedWidth
@@ -337,33 +228,16 @@ class SwipeLayout @JvmOverloads constructor(
             val params = swipeButtonInner!!.layoutParams
             params.width = (widthAnimator.animatedValue as Int)
             swipeButtonInner!!.layoutParams = params
-            setTrailingEffect()
         }
         widthAnimator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 super.onAnimationEnd(animation)
                 isActive = false
                 swipeButtonInner!!.setImageDrawable(disabledDrawable)
-
-                if (layer != null) {
-                    layer!!.visibility = View.GONE
-                }
             }
         })
-        val objectAnimator = ObjectAnimator.ofFloat(centerText, "alpha", 1f)
         val animatorSet = AnimatorSet()
-        animatorSet.playTogether(objectAnimator, widthAnimator)
         animatorSet.start()
-    }
-
-    private fun setTrailingEffect() {
-        if (trailEnabled) {
-            layer!!.visibility = View.VISIBLE
-            layer!!.layoutParams = RelativeLayout.LayoutParams(
-                (swipeButtonInner!!.x + swipeButtonInner!!.width / 3).toInt(),
-                centerText!!.height
-            )
-        }
     }
 
     companion object {
