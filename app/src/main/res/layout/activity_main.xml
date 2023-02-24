@@ -54,6 +54,7 @@
             app:lay_has_activate_state="true"
             app:lay_initial_state="disabled"
             app:lay_inner_text="!!LAYOUT!!"
+            android:layout_marginHorizontal="40dp"
             app:lay_inner_text_background="@drawable/shape_squared"
             app:lay_inner_text_bottom_padding="27dp"
             app:lay_inner_text_color="@android:color/white"
@@ -62,7 +63,8 @@
             app:lay_inner_text_top_padding="27dp">
 
             <ImageView
-                android:layout_width="70dp"
+                android:layout_width="match_parent"
+                android:layout_marginHorizontal="10dp"
                 android:background="@color/purple_200"
                 android:layout_height="match_parent" />
 

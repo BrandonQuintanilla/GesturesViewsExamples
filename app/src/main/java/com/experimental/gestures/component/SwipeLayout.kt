@@ -1,7 +1,6 @@
 package com.experimental.gestures.component
 
 import android.animation.*
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -23,11 +22,9 @@ class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
 ) : FrameLayout(ctx, attrs) {
 
-    private var swipeButtonInner: ImageView? = null
-    private var initialX = 0f
+    private var childView: View? = null
 
-    var isActive = false
-        private set
+    private var initialXEvent = 0f
 
     private var disabledDrawable: Drawable? = null
     private var enabledDrawable: Drawable? = null
@@ -48,7 +45,7 @@ class SwipeLayout @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        swipeButtonInner = children.find { it is ImageView } as? ImageView
+        childView = children.single()
     }
 
     private fun setup(
@@ -123,13 +120,11 @@ class SwipeLayout @JvmOverloads constructor(
             )
             layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
             layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-            isActive = true
         } else {
             val layoutParamsButton =
                 RelativeLayout.LayoutParams(collapsedWidth, collapsedHeight)
             layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
             layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-            isActive = false
         }
         centerText.setPadding(
             innerTextLeftPadding.toInt(),
@@ -158,43 +153,33 @@ class SwipeLayout @JvmOverloads constructor(
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> return !isTouchOutsideInitialPosition(
                         event,
-                        swipeButtonInner!!
+                        childView!!
                     )
                     MotionEvent.ACTION_MOVE -> {
 
-                        Log.i(
-                            "SWIPE_BUTTON",
-                            "onTouch: swipeButtonInner!!.x ${swipeButtonInner!!.x} width:$width  swipeButtonInner!!.width ${swipeButtonInner!!.width}"
-                        )
-                        if (initialX == 0f) {
-                            initialX = swipeButtonInner!!.x
+                        Log.i("TAG", "onTouch event.x: " + event.x)
+
+                        if (initialXEvent == 0f) {
+                            initialXEvent = event.x
                         }
-                        if (event.x > swipeButtonInner!!.width / 2 &&
-                            event.x + swipeButtonInner!!.width / 2 < width
-                        ) {
-                            swipeButtonInner!!.x = event.x - swipeButtonInner!!.width / 2
-                        }
-                        if (event.x + swipeButtonInner!!.width / 2 > width &&
-                            swipeButtonInner!!.x + swipeButtonInner!!.width / 2 < width
-                        ) {
-                            swipeButtonInner!!.x = width - swipeButtonInner!!.width.toFloat()
-                        }
-                        if (event.x < swipeButtonInner!!.width / 2) {
-                            swipeButtonInner!!.x = 0f
-                        }
+
+                        //attach to center
+                        //swipeButtonInner!!.x = event.x - swipeButtonInner!!.width / 2
+
+                        //attach to touch point
+                        childView!!.x = event.x - initialXEvent
+
                         return true
                     }
                     MotionEvent.ACTION_UP -> {
-                        if (isActive) {
-                            collapseButton()
+
+                        if (childView!!.x + childView!!.width > width * 0.9) {
+                            onActiveListener?.onActive()
+                            moveButtonBack()
                         } else {
-                            if (swipeButtonInner!!.x + swipeButtonInner!!.width > width * 0.9) {
-                                onActiveListener?.onActive()
-                                moveButtonBack()
-                            } else {
-                                moveButtonBack()
-                            }
+                            moveButtonBack()
                         }
+
                         return true
                     }
                 }
@@ -203,42 +188,19 @@ class SwipeLayout @JvmOverloads constructor(
         }
 
     private fun moveButtonBack() {
-        val positionAnimator = ValueAnimator.ofFloat(swipeButtonInner!!.x, 0f)
+        val positionAnimator = ValueAnimator.ofFloat(childView!!.x, 0f)
         positionAnimator.interpolator = AccelerateDecelerateInterpolator()
         positionAnimator.addUpdateListener {
             val x = positionAnimator.animatedValue as Float
-            swipeButtonInner!!.x = x
+            childView!!.x = x
         }
         positionAnimator.duration = 200
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(positionAnimator)
         animatorSet.start()
+        initialXEvent = 0f
     }
 
-    @SuppressLint("ObjectAnimatorBinding")
-    private fun collapseButton() {
-        val finalWidth: Int = if (collapsedWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
-            swipeButtonInner!!.height
-        } else {
-            collapsedWidth
-        }
-        val widthAnimator =
-            ValueAnimator.ofInt(swipeButtonInner!!.width, finalWidth)
-        widthAnimator.addUpdateListener {
-            val params = swipeButtonInner!!.layoutParams
-            params.width = (widthAnimator.animatedValue as Int)
-            swipeButtonInner!!.layoutParams = params
-        }
-        widthAnimator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                super.onAnimationEnd(animation)
-                isActive = false
-                swipeButtonInner!!.setImageDrawable(disabledDrawable)
-            }
-        })
-        val animatorSet = AnimatorSet()
-        animatorSet.start()
-    }
 
     companion object {
         private const val ENABLED = 0
