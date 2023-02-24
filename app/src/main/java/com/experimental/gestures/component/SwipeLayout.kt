@@ -26,18 +26,7 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var initialXEvent = 0f
 
-    private var disabledDrawable: Drawable? = null
-    private var enabledDrawable: Drawable? = null
     private var onActiveListener: OnActiveListener? = null
-    private var collapsedWidth = 0
-    private var collapsedHeight = 0
-
-    private var trailEnabled = false
-    private var hasActivationState = false
-    private var buttonLeftPadding = 0f
-    private var buttonTopPadding = 0f
-    private var buttonRightPadding = 0f
-    private var buttonBottomPadding = 0f
 
     init {
         setup(ctx, attrs)
@@ -49,101 +38,10 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     private fun setup(
-        context: Context,
-        attrs: AttributeSet?
+        context: Context, attrs: AttributeSet?
     ) {
-        hasActivationState = true
-        val layoutParamsView = RelativeLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        layoutParamsView.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-        val centerText = TextView(context)
-        centerText.gravity = Gravity.CENTER
-        val layoutParams = RelativeLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-        val typedArray = context.obtainStyledAttributes(
-            attrs, R.styleable.SwipeLayout
-        )
-        collapsedWidth = typedArray.getDimension(
-            R.styleable.SwipeLayout_lay_button_image_width,
-            ViewGroup.LayoutParams.WRAP_CONTENT.toFloat()
-        ).toInt()
-        collapsedHeight = typedArray.getDimension(
-            R.styleable.SwipeLayout_lay_button_image_height,
-            ViewGroup.LayoutParams.WRAP_CONTENT.toFloat()
-        ).toInt()
-        trailEnabled = typedArray.getBoolean(
-            R.styleable.SwipeLayout_lay_button_trail_enabled,
-            false
-        )
-        centerText.text = typedArray.getText(R.styleable.SwipeLayout_lay_inner_text)
-        centerText.setTextColor(
-            typedArray.getColor(
-                R.styleable.SwipeLayout_lay_inner_text_color,
-                Color.WHITE
-            )
-        )
-        val textSize = convertPixelsToSp(
-            typedArray.getDimension(R.styleable.SwipeLayout_lay_inner_text_size, 0f), context
-        )
-        if (textSize != 0f) {
-            centerText.textSize = textSize
-        } else {
-            centerText.textSize = 12f
-        }
-        disabledDrawable = typedArray.getDrawable(R.styleable.SwipeLayout_lay_button_image_disabled)
-        enabledDrawable = typedArray.getDrawable(R.styleable.SwipeLayout_lay_button_image_enabled)
-        val innerTextLeftPadding = typedArray.getDimension(
-            R.styleable.SwipeLayout_lay_inner_text_left_padding, 0f
-        )
-        val innerTextTopPadding = typedArray.getDimension(
-            R.styleable.SwipeLayout_lay_inner_text_top_padding, 0f
-        )
-        val innerTextRightPadding = typedArray.getDimension(
-            R.styleable.SwipeLayout_lay_inner_text_right_padding, 0f
-        )
-        val innerTextBottomPadding = typedArray.getDimension(
-            R.styleable.SwipeLayout_lay_inner_text_bottom_padding, 0f
-        )
-        val initialState = typedArray.getInt(
-            R.styleable.SwipeLayout_lay_initial_state,
-            DISABLED
-        )
-        if (initialState == ENABLED) {
-            val layoutParamsButton = RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
-            layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-        } else {
-            val layoutParamsButton =
-                RelativeLayout.LayoutParams(collapsedWidth, collapsedHeight)
-            layoutParamsButton.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
-            layoutParamsButton.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
-        }
-        centerText.setPadding(
-            innerTextLeftPadding.toInt(),
-            innerTextTopPadding.toInt(),
-            innerTextRightPadding.toInt(),
-            innerTextBottomPadding.toInt()
-        )
-        buttonLeftPadding =
-            typedArray.getDimension(R.styleable.SwipeButton_button_left_padding, 0f)
-        buttonTopPadding =
-            typedArray.getDimension(R.styleable.SwipeButton_button_top_padding, 0f)
-        buttonRightPadding =
-            typedArray.getDimension(R.styleable.SwipeButton_button_right_padding, 0f)
-        buttonBottomPadding =
-            typedArray.getDimension(R.styleable.SwipeButton_button_bottom_padding, 0f)
-        hasActivationState =
-            typedArray.getBoolean(R.styleable.SwipeButton_has_activate_state, true)
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SwipeLayout)
         typedArray.recycle()
-
         setOnTouchListener(buttonTouchListener)
     }
 
@@ -152,8 +50,7 @@ class SwipeLayout @JvmOverloads constructor(
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> return !isTouchOutsideInitialPosition(
-                        event,
-                        childView!!
+                        event, childView!!
                     )
                     MotionEvent.ACTION_MOVE -> {
 
