@@ -1,4 +1,4 @@
-package com.experimental.gestures
+package com.experimental.gestures.recycler
 
 import android.content.Context
 import android.util.AttributeSet

@@ -1,4 +1,4 @@
-package com.experimental.gestures
+package com.experimental.gestures.component
 
 import android.content.Context
 import android.graphics.Canvas

@@ -1,4 +1,4 @@
-package com.experimental.gestures
+package com.experimental.gestures.component
 
 import android.animation.*
 import android.annotation.SuppressLint
@@ -18,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.experimental.gestures.R
 
 /**
  * Created by Brandon Quintanilla on Feb/23/2023

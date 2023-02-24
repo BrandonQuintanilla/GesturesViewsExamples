@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.experimental.gestures.databinding.ActivityMainBinding
+import com.experimental.gestures.recycler.SwipeAdapter
+import com.experimental.gestures.recycler.SwipeToDeleteCallback
 
 
 class MainActivity : AppCompatActivity() {

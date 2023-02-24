@@ -1,4 +1,4 @@
-package com.experimental.gestures
+package com.experimental.gestures.recycler
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

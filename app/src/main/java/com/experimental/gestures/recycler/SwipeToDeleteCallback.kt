@@ -1,4 +1,4 @@
-package com.experimental.gestures
+package com.experimental.gestures.recycler
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
