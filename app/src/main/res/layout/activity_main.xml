@@ -62,9 +62,8 @@
             app:lay_inner_text_size="22sp"
             app:lay_inner_text_top_padding="27dp">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="match_parent"
-                android:layout_marginHorizontal="10dp"
                 android:background="@color/purple_200"
                 android:layout_height="match_parent" />
 
