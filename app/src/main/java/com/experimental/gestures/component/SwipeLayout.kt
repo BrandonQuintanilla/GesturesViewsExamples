@@ -26,8 +26,11 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var swipeButtonInner: ImageView? = null
     private var initialX = 0f
+
     var isActive = false
         private set
+
+
     private var centerText: TextView? = null
     private var background: ViewGroup? = null
     private var disabledDrawable: Drawable? = null
