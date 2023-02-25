@@ -28,7 +28,7 @@ class SwipeLayout @JvmOverloads constructor(
     // Define initial state
     private var state = State.IDLE
 
-    private var buttonWidthRatio = 0.3
+    private var buttonWidthRatio = 0.25
 
     private var initialXEvent = 0f
 
@@ -57,6 +57,11 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
+
+        if(!childView!!.isTouchInside(eventX)){
+            return false
+        }
+
         val event = resolveEvent(eventAction, eventX)
         Log.i(
             "TAG",
@@ -70,10 +75,10 @@ class SwipeLayout @JvmOverloads constructor(
                 reactDrag(event, eventX)
             }
             State.HOLDING_LEFT -> {
-                reactHoldingLeft(event)
+                reactHoldingLeft(event, eventX)
             }
             State.HOLDING_RIGHT -> {
-                reactHoldingRight(event)
+                reactHoldingRight(event, eventX)
             }
         }
         return true
@@ -96,24 +101,7 @@ class SwipeLayout @JvmOverloads constructor(
         when (event) {
             Event.TOUCH_DOWN -> Unit
             Event.TOUCH_UP -> {
-                when {
-                    this.x > this.width * buttonWidthRatio -> {
-                        childView?.accelerateOriginHorizontally(
-                            to = this.width * buttonWidthRatio
-                        )
-                        transitTo(State.HOLDING_LEFT)
-                    }
-                    this.x < -this.width * buttonWidthRatio -> {
-                        childView?.accelerateOriginHorizontally(
-                            to = -this.width * buttonWidthRatio
-                        )
-                        transitTo(State.HOLDING_RIGHT)
-                    }
-                    else -> {
-                        transitTo(State.IDLE)
-                        childView?.accelerateOriginHorizontally(to = 0)
-                    }
-                }
+                resolveTransition()
             }
             Event.DRAGGED -> {
                 childView!!.x = eventX - initialXEvent
@@ -123,23 +111,66 @@ class SwipeLayout @JvmOverloads constructor(
         }
     }
 
-    private fun reactHoldingLeft(event: Event) {
-        when (event) {
-            Event.TOUCH_DOWN -> {}
-            Event.TOUCH_UP -> {}
-            Event.DRAGGED -> {}
-            Event.VOID -> {}
-            Event.SCROLLED -> {}
+    private fun resolveTransition() {
+        when {
+            childView!!.x > this.width * 0.45 -> { // complete swipe to right and return
+                childView?.accelerateOriginHorizontally(
+                    to = this.width
+                ) {
+                    childView?.accelerateOriginHorizontally(to = 0)
+                }
+                transitTo(State.IDLE)
+            }
+            childView!!.x < -this.width * 0.45 -> { // complete swipe to left and return
+                childView?.accelerateOriginHorizontally(
+                    to = -this.width
+                ) {
+                    childView?.accelerateOriginHorizontally(to = 0)
+                }
+                transitTo(State.IDLE)
+            }
+            childView!!.x > this.width * buttonWidthRatio -> { // shows left
+                childView?.accelerateOriginHorizontally(
+                    to = this.width * buttonWidthRatio
+                )
+                transitTo(State.HOLDING_LEFT)
+            }
+            childView!!.x < -this.width * buttonWidthRatio -> { // shows right
+                childView?.accelerateOriginHorizontally(
+                    to = -this.width * buttonWidthRatio
+                )
+                transitTo(State.HOLDING_RIGHT)
+            }
+            else -> { // dropped at the middle -- action canceled
+                transitTo(State.IDLE)
+                childView?.accelerateOriginHorizontally(to = 0)
+            }
         }
     }
 
-    private fun reactHoldingRight(event: Event) {
+    private fun reactHoldingLeft(event: Event, eventX: Float) {
         when (event) {
-            Event.TOUCH_DOWN -> {}
-            Event.TOUCH_UP -> {}
-            Event.DRAGGED -> {}
-            Event.VOID -> {}
-            Event.SCROLLED -> {}
+            Event.TOUCH_DOWN -> {
+                initialXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
+                transitTo(State.DRAGGING)
+            }
+            Event.TOUCH_UP -> Unit
+            Event.DRAGGED -> Unit
+            Event.VOID -> Unit
+            Event.SCROLLED -> Unit
+        }
+    }
+
+    private fun reactHoldingRight(event: Event, eventX: Float) {
+        when (event) {
+            Event.TOUCH_DOWN -> {
+                initialXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
+                transitTo(State.DRAGGING)
+            }
+            Event.TOUCH_UP -> Unit
+            Event.DRAGGED -> Unit
+            Event.VOID -> Unit
+            Event.SCROLLED -> Unit
         }
     }
 
@@ -172,49 +203,6 @@ class SwipeLayout @JvmOverloads constructor(
         }
     }
 
-    /*
-
-     return when (eventAction) {
-            MotionEvent.ACTION_DOWN -> {
-                initialXEvent = eventX
-                childView?.isTouchInside(eventX) ?: false
-            }
-            MotionEvent.ACTION_MOVE -> {
-
-                val deltaX = initialXEvent - eventX
-                //attach to touch point
-                childView!!.x = eventX - initialXEvent
-
-
-                /*
-                if (deltaX > 0) {
-                    // The touch move was to the right
-                    // Do something here...
-                } else if (deltaX < 0) {
-                    // The touch move was to the left
-                    // Do something here...
-                }*/
-
-                true
-            }
-            MotionEvent.ACTION_UP -> {
-
-                //resolveRelativePosition()
-                if (childView!!.x + childView!!.width > width * 0.9) {
-                    onActiveListener?.onActive()
-                }
-                returnToOriginalPosition()
-
-                true
-            }
-            else -> false
-        }
-
-    private fun returnToOriginalPosition() {
-        childView?.accelerateOriginHorizontally(0)
-    }
-    * */
-
     enum class Event {
         TOUCH_DOWN,
         TOUCH_UP,
@@ -224,7 +212,7 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     enum class State {
-        IDLE,// TODO ADD TRANSITING
+        IDLE,// TODO ADD TRANSITING STATE
         DRAGGING,
         HOLDING_LEFT,
         HOLDING_RIGHT
@@ -260,8 +248,3 @@ fun View.accelerateOriginHorizontally(
     positionAnimator.duration = along
     positionAnimator.start()
 }
-
-/*fun Int.percent(percent: Int): Int {
-    return this * percent / 100
-}
- */
