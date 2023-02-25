@@ -11,9 +11,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.FrameLayout
+import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import com.experimental.gestures.R
+
 
 /**
  * Created by Brandon Quintanilla on Feb/24/2023
@@ -21,7 +24,7 @@ import com.experimental.gestures.R
 
 class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
-) : FrameLayout(ctx, attrs) {
+) : ConstraintLayout(ctx, attrs) {
 
     private var childView: View? = null
 
@@ -30,7 +33,7 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var buttonWidthRatio = 0.25
 
-    private var initialXEvent = 0f
+    private var childRelativeXEvent = 0f
 
     private var onActiveListener: OnActiveListener? = null
 
@@ -46,6 +49,92 @@ class SwipeLayout @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         childView = children.single()
+        //addView(v,0)
+        addSideChildren()
+    }
+
+    private fun addSideChildren() {
+        // Create the left ImageView and set its image resource
+        val leftImageView = ImageView(context)
+        leftImageView.setBackgroundColor(context.getColor(R.color.green))
+        leftImageView.id = View.generateViewId();
+        //        leftImageView.setImageResource(R.drawable.left_image)
+
+        // Create the right ImageView and set its image resource
+        val rightImageView = ImageView(context)
+        leftImageView.setBackgroundColor(context.getColor(R.color.red))
+        rightImageView.id = View.generateViewId();
+        //      rightImageView.setImageResource(R.drawable.right_image)
+
+        // Add the left and right ImageViews to the ConstraintLayout
+        this.addView(leftImageView)
+        this.addView(rightImageView)
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+        // Set the constraints for the left ImageView
+        constraintSet.connect(
+            leftImageView.id,
+            ConstraintSet.START,
+            this.id,
+            ConstraintSet.START
+        )
+        constraintSet.connect(
+            leftImageView.id,
+            ConstraintSet.END,
+            childView!!.id,
+            ConstraintSet.START
+        )
+        constraintSet.connect(
+            leftImageView.id,
+            ConstraintSet.TOP,
+            childView!!.id,
+            ConstraintSet.TOP
+        )
+        constraintSet.connect(
+            leftImageView.id,
+            ConstraintSet.BOTTOM,
+            childView!!.id,
+            ConstraintSet.BOTTOM
+        )
+
+        // Set the constraints for the right ImageView
+        constraintSet.connect(
+            rightImageView.id,
+            ConstraintSet.START,
+            childView!!.id,
+            ConstraintSet.END
+        )
+        constraintSet.connect(
+            rightImageView.id,
+            ConstraintSet.END,
+            this.id,
+            ConstraintSet.END
+        )
+        constraintSet.connect(
+            rightImageView.id,
+            ConstraintSet.TOP,
+            childView!!.id,
+            ConstraintSet.TOP
+        )
+        constraintSet.connect(
+            rightImageView.id,
+            ConstraintSet.BOTTOM,
+            childView!!.id,
+            ConstraintSet.BOTTOM
+        )
+
+        // Set the constraints for the existing child view
+        constraintSet.connect(
+            childView!!.id,
+            ConstraintSet.END,
+            leftImageView.id,
+            ConstraintSet.START
+        )
+
+        // Apply the constraints to the ConstraintLayout
+        constraintSet.applyTo(this)
     }
 
     private fun setup(
@@ -58,7 +147,7 @@ class SwipeLayout @JvmOverloads constructor(
 
     private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
 
-        if(!childView!!.isTouchInside(eventX)){
+        if (!childView!!.isTouchInside(eventX)) {
             return false
         }
 
@@ -87,7 +176,7 @@ class SwipeLayout @JvmOverloads constructor(
     private fun reactIdle(event: Event, eventX: Float) {
         when (event) {
             Event.TOUCH_DOWN -> {
-                initialXEvent = eventX
+                childRelativeXEvent = eventX
                 transitTo(State.DRAGGING)
             }
             Event.TOUCH_UP -> Unit
@@ -104,7 +193,7 @@ class SwipeLayout @JvmOverloads constructor(
                 resolveTransition()
             }
             Event.DRAGGED -> {
-                childView!!.x = eventX - initialXEvent
+                childView!!.x = eventX - childRelativeXEvent
             }
             Event.VOID -> Unit
             Event.SCROLLED -> Unit
@@ -151,7 +240,7 @@ class SwipeLayout @JvmOverloads constructor(
     private fun reactHoldingLeft(event: Event, eventX: Float) {
         when (event) {
             Event.TOUCH_DOWN -> {
-                initialXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
+                childRelativeXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
                 transitTo(State.DRAGGING)
             }
             Event.TOUCH_UP -> Unit
@@ -164,7 +253,7 @@ class SwipeLayout @JvmOverloads constructor(
     private fun reactHoldingRight(event: Event, eventX: Float) {
         when (event) {
             Event.TOUCH_DOWN -> {
-                initialXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
+                childRelativeXEvent = (eventX + this.width * buttonWidthRatio).toFloat()
                 transitTo(State.DRAGGING)
             }
             Event.TOUCH_UP -> Unit
@@ -204,18 +293,12 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     enum class Event {
-        TOUCH_DOWN,
-        TOUCH_UP,
-        DRAGGED,
-        VOID,
-        SCROLLED
+        TOUCH_DOWN, TOUCH_UP, DRAGGED, VOID, SCROLLED
     }
 
     enum class State {
         IDLE,// TODO ADD TRANSITING STATE
-        DRAGGING,
-        HOLDING_LEFT,
-        HOLDING_RIGHT
+        DRAGGING, HOLDING_LEFT, HOLDING_RIGHT
     }
 }
 
@@ -230,9 +313,7 @@ fun View.isTouchInside(eventX: Float): Boolean {
 }
 
 fun View.accelerateOriginHorizontally(
-    to: Number,
-    along: Long = 150,
-    completion: (() -> Unit)? = null
+    to: Number, along: Long = 125, completion: (() -> Unit)? = null
 ) {
     val positionAnimator = ValueAnimator.ofFloat(this.x, to.toFloat())
     positionAnimator.interpolator = AccelerateDecelerateInterpolator()
@@ -247,4 +328,10 @@ fun View.accelerateOriginHorizontally(
     })
     positionAnimator.duration = along
     positionAnimator.start()
+}
+
+fun ImageView.width(width: Int) {
+    val params = this.layoutParams
+    params.width = width
+    this.layoutParams = params
 }
