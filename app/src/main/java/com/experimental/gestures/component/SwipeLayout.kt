@@ -1,13 +1,14 @@
 package com.experimental.gestures.component
 
-import android.animation.AnimatorSet
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.view.children
@@ -16,6 +17,15 @@ import com.experimental.gestures.R
 /**
  * Created by Brandon Quintanilla on Feb/24/2023
  */
+enum class Event {
+    TOUCH_DOWN,
+    TOUCH_UP,
+}
+
+enum class State {
+    IDLE, DRAGGING, HOLDING_LEFT, HOLDING_RIGHT
+}
+
 class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
 ) : FrameLayout(ctx, attrs) {
@@ -28,33 +38,7 @@ class SwipeLayout @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     private val buttonTouchListener: OnTouchListener = OnTouchListener { v, event ->
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> childView?.isTouchInside(event) ?: false
-            MotionEvent.ACTION_MOVE -> {
-
-                Log.i("TAG", "onTouch event.x: " + event.x)
-                Log.i("TAG", "onTouch childView!!.width: " + childView!!.width)
-
-                if (initialXEvent == 0f) {
-                    initialXEvent = event.x
-                }
-
-                //attach to touch point
-                childView!!.x = event.x - initialXEvent
-
-                true
-            }
-            MotionEvent.ACTION_UP -> {
-
-                if (childView!!.x + childView!!.width > width * 0.9) {
-                    onActiveListener?.onActive()
-                }
-                returnToOriginalPosition()
-
-                true
-            }
-            else -> false
-        }
+        handleTouch(event.action, event.x)
     }
 
     init {
@@ -74,26 +58,77 @@ class SwipeLayout @JvmOverloads constructor(
         setOnTouchListener(buttonTouchListener)
     }
 
-    private fun returnToOriginalPosition() {
-        Log.i("TAG", "onTouch childView!!.width: " + childView!!.width)
+    private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
+        return when (eventAction) {
+            MotionEvent.ACTION_DOWN -> {
+                initialXEvent = eventX
+                childView?.isTouchInside(eventX) ?: false
+            }
+            MotionEvent.ACTION_MOVE -> {
 
-        val positionAnimator = ValueAnimator.ofFloat(childView!!.x, 0f)
-        positionAnimator.interpolator = AccelerateDecelerateInterpolator()
-        positionAnimator.addUpdateListener {
-            val x = positionAnimator.animatedValue as Float
-            childView!!.x = x
-            Log.i("TAG", "onTouch childView!!.width: " + childView!!.width)
+                val deltaX = initialXEvent - eventX
+                //attach to touch point
+                childView!!.x = eventX - initialXEvent
+
+
+                /*
+                if (deltaX > 0) {
+                    // The touch move was to the right
+                    // Do something here...
+                } else if (deltaX < 0) {
+                    // The touch move was to the left
+                    // Do something here...
+                }*/
+
+                true
+            }
+            MotionEvent.ACTION_UP -> {
+
+                //resolveRelativePosition()
+                if (childView!!.x + childView!!.width > width * 0.9) {
+                    onActiveListener?.onActive()
+                }
+                returnToOriginalPosition()
+
+                true
+            }
+            else -> false
         }
-        positionAnimator.duration = 200
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(positionAnimator)
-        animatorSet.start()
-        initialXEvent = 0f
+    }
+
+    private fun returnToOriginalPosition() {
+        childView?.accelerateOriginHorizontally() {
+            //initialXEvent = 0f
+        }
     }
 }
 
-fun View.isTouchInside(event: MotionEvent): Boolean {
-    val isBeforeLeft = event.x <= this.x + this.width
-    val isAfterRight = event.x > this.x
+/////////////////////////////
+//////////Extensions/////////
+/////////////////////////////
+
+fun View.isTouchInside(eventX: Float): Boolean {
+    val isBeforeLeft = eventX <= this.x + this.width
+    val isAfterRight = eventX > this.x
     return isBeforeLeft && isAfterRight
+}
+
+fun View.accelerateOriginHorizontally(
+    to: Float = 0f,
+    along: Long = 150,
+    completion: (() -> Unit)? = null
+) {
+    val positionAnimator = ValueAnimator.ofFloat(this.x, to)
+    positionAnimator.interpolator = AccelerateDecelerateInterpolator()
+    positionAnimator.addUpdateListener {
+        val x = positionAnimator.animatedValue as Float
+        this.x = x
+    }
+    positionAnimator.addListener(object : AnimatorListenerAdapter() {
+        override fun onAnimationEnd(animation: Animator) {
+            completion?.invoke()
+        }
+    })
+    positionAnimator.duration = along
+    positionAnimator.start()
 }
