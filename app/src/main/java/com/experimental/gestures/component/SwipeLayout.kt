@@ -55,11 +55,9 @@ class SwipeLayout @JvmOverloads constructor(
 
     private lateinit var leftImageView: ImageView
     private fun addSideChildren() {
-        //val layControls =
         val layControls = RelativeLayout(context)
         val layoutParamsView = RelativeLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         )
         layoutParamsView.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
         addView(layControls, 0, layoutParamsView)
@@ -150,8 +148,7 @@ class SwipeLayout @JvmOverloads constructor(
     private fun setTrailingEffect() {
         leftImageView.visibility = View.VISIBLE
         leftImageView.layoutParams = FrameLayout.LayoutParams(
-            childView!!.x.toInt(),
-            childView!!.height
+            childView!!.x.toInt(), childView!!.height
         )
 
     }
@@ -188,7 +185,10 @@ class SwipeLayout @JvmOverloads constructor(
             }
             else -> { // dropped at the middle -- action canceled
                 transitTo(State.IDLE)
-                childView?.accelerateOriginHorizontally(to = 0)
+                acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
+                    childView!!.x = it.toFloat()
+                    leftImageView.width(it)
+                })
             }
         }
     }
@@ -287,7 +287,31 @@ fun View.accelerateOriginHorizontally(
 }
 
 fun ImageView.width(width: Int) {
-    val params = this.layoutParams
-    params.width = width
-    this.layoutParams = params
+    this.layoutParams.let {
+        it.width = width
+        this.layoutParams = it
+    }
+}
+
+inline fun acceleratedInterpolation(
+    from: Number,
+    to: Number,
+    along: Long = 125,
+    crossinline onValue: ((Int) -> Unit),
+    noinline completion: (() -> Unit)? = null
+) {
+    val positionAnimator = ValueAnimator.ofInt(from.toInt(), to.toInt())
+    positionAnimator.interpolator = AccelerateDecelerateInterpolator()
+    positionAnimator.addUpdateListener {
+        onValue.invoke(it.animatedValue as Int)
+    }
+    completion?.let {
+        positionAnimator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                completion.invoke()
+            }
+        })
+    }
+    positionAnimator.duration = along
+    positionAnimator.start()
 }
