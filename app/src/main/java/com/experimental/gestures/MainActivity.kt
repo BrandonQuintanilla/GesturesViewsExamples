@@ -1,6 +1,7 @@
 package com.experimental.gestures
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(bind.root)
         setupRecycler()
+        setupSwipe()
     }
 
     private fun setupRecycler() {
@@ -26,5 +28,17 @@ class MainActivity : AppCompatActivity() {
         val itemTouchHelper = ItemTouchHelper(SwipeToDeleteCallback(swipeAdapter))
         itemTouchHelper.attachToRecyclerView(bind.rvMain)
         bind.rvMain.adapter = swipeAdapter
+    }
+
+    private fun setupSwipe() = bind.apply {
+        laySwipe.onSwipe { direction ->
+            Log.i("TAG", "setupSwipe: onSwipe ${direction}")
+        }
+        laySwipe.onLeftClick {
+            Log.i("TAG", "setupSwipe: onLeftClick")
+        }
+        laySwipe.onRightClick {
+            Log.i("TAG", "setupSwipe: onRightClick")
+        }
     }
 }

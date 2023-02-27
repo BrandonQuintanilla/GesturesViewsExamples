@@ -10,11 +10,9 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
-import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import androidx.core.view.children
 import com.experimental.gestures.R
 
@@ -38,6 +36,13 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var onActiveListener: OnActiveListener? = null
 
+    private var onSwipeListener: ((Int) -> Unit?) = {}
+
+    companion object {
+        const val RIGHT = 1
+        const val LEFT = 1
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private val buttonTouchListener: OnTouchListener = OnTouchListener { v, event ->
         handleTouch(event.action, event.x)
@@ -53,19 +58,25 @@ class SwipeLayout @JvmOverloads constructor(
         addSideChildren()
     }
 
-    private lateinit var leftImageView: ImageView
+    private var leftImageView = ImageView(ctx)
+    private var rightImageView = ImageView(ctx)
+    /*
     private lateinit var rightImageView: ImageView
+    private lateinit var leftImageView: ImageView
+    */
     private fun addSideChildren() {
 
         // Create the left ImageView and set its image resource
-        leftImageView = ImageView(context)
+        //leftImageView = ImageView(context)
         leftImageView.setBackgroundColor(context.getColor(R.color.green))
+        leftImageView.layoutParams = FrameLayout.LayoutParams(0, 0)
         leftImageView.id = View.generateViewId()
 
         // Create the right ImageView and set its image resource
         //TODO rightImageView is not modified by dragging
-        rightImageView = ImageView(context)
+        //rightImageView = ImageView(context)
         rightImageView.setBackgroundColor(context.getColor(R.color.red))
+        rightImageView.layoutParams = FrameLayout.LayoutParams(0, 0)
         rightImageView.id = View.generateViewId()
 
         // Add the left and right ImageViews to the ConstraintLayout
@@ -119,7 +130,12 @@ class SwipeLayout @JvmOverloads constructor(
         }
     }
 
+    fun onLeftClick(l: OnClickListener) = this.leftImageView.setOnClickListener(l)
+    fun onRightClick(l: OnClickListener) = this.rightImageView.setOnClickListener(l)
 
+    fun onSwipe(l: (Int) -> Unit) {
+        this.onSwipeListener = l
+    }
 
     private fun reactDrag(interaction: Interaction, eventX: Float) {
         when (interaction) {
@@ -152,12 +168,10 @@ class SwipeLayout @JvmOverloads constructor(
     private fun resolveTransition() {
         when {
             childView!!.x > this.width * 0.45 -> { // complete swipe to right and return
-                acceleratedInterpolation(
-                    from = childView!!.x, to = this.width, onValue = {
-                        childView!!.x = it.toFloat()
-                        leftImageView.width(it)
-                    }
-                ) {
+                acceleratedInterpolation(from = childView!!.x, to = this.width, onValue = {
+                    childView!!.x = it.toFloat()
+                    leftImageView.width(it)
+                }) {
                     acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
                         childView!!.x = it.toFloat()
                         leftImageView.width(it)
@@ -172,12 +186,10 @@ class SwipeLayout @JvmOverloads constructor(
             }
             childView!!.x < -this.width * 0.45 -> { // complete swipe to left and return
 
-                acceleratedInterpolation(
-                    from = childView!!.x, to = -this.width, onValue = {
-                        childView!!.x = it.toFloat()
-                        //leftImageView.width(it)//TODO right
-                    }
-                ) {
+                acceleratedInterpolation(from = childView!!.x, to = -this.width, onValue = {
+                    childView!!.x = it.toFloat()
+                    //leftImageView.width(it)//TODO right
+                }) {
                     acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
                         childView!!.x = it.toFloat()
                         //leftImageView.width(it) // TODO right
@@ -186,21 +198,23 @@ class SwipeLayout @JvmOverloads constructor(
                 transitTo(State.IDLE)
             }
             childView!!.x > this.width * buttonWidthRatio -> { // shows left
-                acceleratedInterpolation(from = childView!!.x, to = this.width * buttonWidthRatio,
+                acceleratedInterpolation(
+                    from = childView!!.x,
+                    to = this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
                         leftImageView.width(it)
-                    }
-                )
+                    })
                 transitTo(State.HOLDING_LEFT)
             }
             childView!!.x < -this.width * buttonWidthRatio -> { // shows right
-                acceleratedInterpolation(from = childView!!.x, to = -this.width * buttonWidthRatio,
+                acceleratedInterpolation(
+                    from = childView!!.x,
+                    to = -this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
                         //leftImageView.width(it)
-                    }
-                )
+                    })
                 /*childView?.accelerateOriginHorizontally(
                     to = -this.width * buttonWidthRatio
                 )*/
