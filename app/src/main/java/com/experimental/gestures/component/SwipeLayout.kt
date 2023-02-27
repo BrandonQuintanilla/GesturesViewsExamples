@@ -60,21 +60,17 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var leftImageView = ImageView(ctx)
     private var rightImageView = ImageView(ctx)
-    /*
-    private lateinit var rightImageView: ImageView
-    private lateinit var leftImageView: ImageView
-    */
+
+
     private fun addSideChildren() {
 
         // Create the left ImageView and set its image resource
-        //leftImageView = ImageView(context)
         leftImageView.setBackgroundColor(context.getColor(R.color.green))
         leftImageView.layoutParams = FrameLayout.LayoutParams(0, 0)
         leftImageView.id = View.generateViewId()
 
         // Create the right ImageView and set its image resource
         //TODO rightImageView is not modified by dragging
-        //rightImageView = ImageView(context)
         rightImageView.setBackgroundColor(context.getColor(R.color.red))
         rightImageView.layoutParams = FrameLayout.LayoutParams(0, 0)
         rightImageView.id = View.generateViewId()
@@ -90,7 +86,6 @@ class SwipeLayout @JvmOverloads constructor(
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SwipeLayout)
         typedArray.recycle()
         setOnTouchListener(buttonTouchListener)
-        //addSideChildren()
     }
 
     private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
@@ -144,12 +139,13 @@ class SwipeLayout @JvmOverloads constructor(
                 resolveTransition()
             }
             Interaction.DRAGGED -> {
-                Log.i(
+                /*Log.i(
                     "TAG",
                     "reactDrag: childView?.width:${childView?.width} leftImageView.width: ${leftImageView.width} childView?.x: ${childView?.x}"
-                )
+                )*/
                 childView!!.x = eventX - childRelativeXEvent
                 setTrailingEffect()
+                setLeadingEffect()
             }
             Interaction.VOID -> Unit
             Interaction.SCROLLED -> Unit
@@ -158,11 +154,17 @@ class SwipeLayout @JvmOverloads constructor(
 
     //TODO rename
     private fun setTrailingEffect() {
-        leftImageView.visibility = View.VISIBLE
         leftImageView.layoutParams = FrameLayout.LayoutParams(
             childView!!.x.toInt(), childView!!.height
         )
+    }
 
+    // TODO optimize
+    private fun setLeadingEffect() {
+        rightImageView.x = this.width.toFloat() + childView!!.x.toInt()
+        rightImageView.layoutParams = FrameLayout.LayoutParams(
+            -childView!!.x.toInt(), childView!!.height
+        )
     }
 
     private fun resolveTransition() {
@@ -188,6 +190,7 @@ class SwipeLayout @JvmOverloads constructor(
 
                 acceleratedInterpolation(from = childView!!.x, to = -this.width, onValue = {
                     childView!!.x = it.toFloat()
+                    //rightImageView.width(it)
                     //leftImageView.width(it)//TODO right
                 }) {
                     acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
