@@ -156,31 +156,58 @@ class SwipeLayout @JvmOverloads constructor(
     private fun resolveTransition() {
         when {
             childView!!.x > this.width * 0.45 -> { // complete swipe to right and return
-                childView?.accelerateOriginHorizontally(
+                acceleratedInterpolation(
+                    from = childView!!.x, to = this.width, onValue = {
+                        childView!!.x = it.toFloat()
+                        leftImageView.width(it)
+                    }
+                ) {
+                    acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
+                        childView!!.x = it.toFloat()
+                        leftImageView.width(it)
+                    })
+                }
+                /*childView?.accelerateOriginHorizontally(
                     to = this.width
                 ) {
                     childView?.accelerateOriginHorizontally(to = 0)
-                }
+                }*/
                 transitTo(State.IDLE)
             }
             childView!!.x < -this.width * 0.45 -> { // complete swipe to left and return
-                childView?.accelerateOriginHorizontally(
-                    to = -this.width
+
+                acceleratedInterpolation(
+                    from = childView!!.x, to = -this.width, onValue = {
+                        childView!!.x = it.toFloat()
+                        //leftImageView.width(it)//TODO right
+                    }
                 ) {
-                    childView?.accelerateOriginHorizontally(to = 0)
+                    acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
+                        childView!!.x = it.toFloat()
+                        //leftImageView.width(it) // TODO right
+                    })
                 }
                 transitTo(State.IDLE)
             }
             childView!!.x > this.width * buttonWidthRatio -> { // shows left
-                childView?.accelerateOriginHorizontally(
-                    to = this.width * buttonWidthRatio
+                acceleratedInterpolation(from = childView!!.x, to = this.width * buttonWidthRatio,
+                    onValue = {
+                        childView!!.x = it.toFloat()
+                        leftImageView.width(it)
+                    }
                 )
                 transitTo(State.HOLDING_LEFT)
             }
             childView!!.x < -this.width * buttonWidthRatio -> { // shows right
-                childView?.accelerateOriginHorizontally(
-                    to = -this.width * buttonWidthRatio
+                acceleratedInterpolation(from = childView!!.x, to = -this.width * buttonWidthRatio,
+                    onValue = {
+                        childView!!.x = it.toFloat()
+                        //leftImageView.width(it)
+                    }
                 )
+                /*childView?.accelerateOriginHorizontally(
+                    to = -this.width * buttonWidthRatio
+                )*/
                 transitTo(State.HOLDING_RIGHT)
             }
             else -> { // dropped at the middle -- action canceled
