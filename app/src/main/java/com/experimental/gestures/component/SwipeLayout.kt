@@ -19,6 +19,7 @@ import com.experimental.gestures.R
  */
 //TODO handle scroll
 //TODO handle other action events (VOID INTERACTION)
+//TODO ADD side and child view overlap
 class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
 ) : FrameLayout(ctx, attrs) {
