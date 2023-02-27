@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.experimental.gestures.databinding.ActivityMainBinding
+import com.experimental.gestures.recycler.CustomSwipeAdapterconstructor
 import com.experimental.gestures.recycler.SwipeAdapter
 import com.experimental.gestures.recycler.SwipeToDeleteCallback
 
@@ -19,8 +20,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(bind.root)
-        setupRecycler()
+        //setupRecycler()
+        setupCustomSwipeAdapter()
         setupSwipe()
+    }
+
+    private fun setupCustomSwipeAdapter() {
+        val swipeAdapter = CustomSwipeAdapterconstructor()
+        bind.rvMain.adapter = swipeAdapter
+        //bind.rvMain.onInterceptTouchEvent()
+        //bind.rvMain.requestDisallowInterceptTouchEvent(false)
     }
 
     private fun setupRecycler() {

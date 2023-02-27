@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -57,6 +58,8 @@ class SwipeLayout @JvmOverloads constructor(
 
     override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
 
+        Log.i("TAG", "onInterceptTouchEvent: event?.action:${event?.action} event.x:${event?.x}")
+
         event?.let {
             handleTouch(event.action, event.x)
         }
@@ -68,8 +71,15 @@ class SwipeLayout @JvmOverloads constructor(
         }
 
         previousMotionEvent = event?.action ?: -1
-        return super.onInterceptTouchEvent(event)
+        return false
+        //return super.onInterceptTouchEvent(event)
     }
+
+    /*
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        Log.i("TAG", "onInterceptTouchEvent onTouchEvent: event?.action:${event?.action} event.x:${event?.x}")
+        return super.onTouchEvent(event)
+    }*/
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
