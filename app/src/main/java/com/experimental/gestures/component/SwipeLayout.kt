@@ -17,18 +17,19 @@ import com.experimental.gestures.R
 /**
  * Created by Brandon Quintanilla on Feb/24/2023
  */
-
+//TODO handle scroll
+//TODO handle other action events (VOID INTERACTION)
 class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
 ) : FrameLayout(ctx, attrs) {
 
-    private var childView: View? = null
-
     private var state = State.IDLE
 
     private var buttonWidthRatio = 0.25
+    private var acceptSwipeThreshold = 0.45
 
-    private var childRelativeXEvent = 0f
+    private var childView: View? = null
+    private var childAnchorPosition = 0f
 
     private var onSwipeListener: ((Int) -> Unit?) = {}
 
@@ -39,12 +40,12 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var previousMotionEvent: Int = -1
 
+    private var leftImageView = ImageView(ctx)
+    private var rightImageView = ImageView(ctx)
+
     init {
         setup(ctx, attrs)
     }
-
-    private var leftImageView = ImageView(ctx)
-    private var rightImageView = ImageView(ctx)
 
     private fun setup(
         context: Context, attrs: AttributeSet?
@@ -89,10 +90,10 @@ class SwipeLayout @JvmOverloads constructor(
         this.addView(rightImageView, 0)
     }
 
-    private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
+    private fun handleTouch(eventAction: Int, eventX: Float) {
 
         if (!childView!!.isTouchInside(eventX)) {
-            return false
+            return
         }
 
         val interaction = resolveInteraction(eventAction, eventX)
@@ -110,13 +111,13 @@ class SwipeLayout @JvmOverloads constructor(
                 reactHoldingRight(interaction, eventX)
             }
         }
-        return true
+        return
     }
 
     private fun reactIdle(interaction: Interaction, eventX: Float) {
         when (interaction) {
             Interaction.TOUCH_DOWN -> {
-                childRelativeXEvent = eventX
+                childAnchorPosition = eventX
                 transitTo(State.DRAGGING)
             }
             Interaction.TOUCH_UP -> Unit
@@ -151,7 +152,7 @@ class SwipeLayout @JvmOverloads constructor(
                 resolveTransition()
             }
             Interaction.DRAGGED -> {
-                childView!!.x = eventX - childRelativeXEvent
+                childView!!.x = eventX - childAnchorPosition
                 updateLeftViewParams()
                 updateRightViewParams()
             }
@@ -175,18 +176,19 @@ class SwipeLayout @JvmOverloads constructor(
 
     private fun resolveTransition() {
         when {
-            childView!!.x > this.width * 0.45 -> { // complete swipe to right and return
+            childView!!.x > this.width * acceptSwipeThreshold -> { // complete swipe to right and return
                 completeRightSwipe()
                 transitTo(State.IDLE)
                 onSwipeListener.invoke(RIGHT)
             }
-            childView!!.x < -this.width * 0.45 -> { // complete swipe to left and return
+            childView!!.x < -this.width * acceptSwipeThreshold -> { // complete swipe to left and return
                 completeLeftSwipe()
                 transitTo(State.IDLE)
                 onSwipeListener.invoke(LEFT)
             }
             childView!!.x > this.width * buttonWidthRatio -> { // shows left
-                acceleratedInterpolation(from = childView!!.x,
+                acceleratedInterpolation(
+                    from = childView!!.x,
                     to = this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
@@ -195,7 +197,8 @@ class SwipeLayout @JvmOverloads constructor(
                 transitTo(State.HOLDING_LEFT)
             }
             childView!!.x < -this.width * buttonWidthRatio -> { // shows right
-                acceleratedInterpolation(from = childView!!.x,
+                acceleratedInterpolation(
+                    from = childView!!.x,
                     to = -this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
@@ -205,10 +208,14 @@ class SwipeLayout @JvmOverloads constructor(
             }
             else -> { // dropped at the middle -- action canceled
                 transitTo(State.IDLE)
-                acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
-                    childView!!.x = it.toFloat()
-                    leftImageView.width(it)
-                })
+                acceleratedInterpolation(
+                    from = childView!!.x,
+                    to = 0,
+                    onValue = {
+                        childView!!.x = it.toFloat()
+                        leftImageView.width(it)
+                        updateRightViewParams()
+                    })
             }
         }
     }
@@ -240,7 +247,7 @@ class SwipeLayout @JvmOverloads constructor(
     private fun reactHoldingLeft(interaction: Interaction, eventX: Float) {
         when (interaction) {
             Interaction.TOUCH_DOWN -> {
-                childRelativeXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
+                childAnchorPosition = (eventX - this.width * buttonWidthRatio).toFloat()
                 transitTo(State.DRAGGING)
             }
             Interaction.TOUCH_UP -> Unit
@@ -253,7 +260,7 @@ class SwipeLayout @JvmOverloads constructor(
     private fun reactHoldingRight(interaction: Interaction, eventX: Float) {
         when (interaction) {
             Interaction.TOUCH_DOWN -> {
-                childRelativeXEvent = (eventX + this.width * buttonWidthRatio).toFloat()
+                childAnchorPosition = (eventX + this.width * buttonWidthRatio).toFloat()
                 transitTo(State.DRAGGING)
             }
             Interaction.TOUCH_UP -> Unit
@@ -264,12 +271,6 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     private fun transitTo(newState: State) {
-        /*when(state){
-            State.IDLE -> TODO()
-            State.DRAGGING -> TODO()
-            State.HOLDING_LEFT -> TODO()
-            State.HOLDING_RIGHT -> TODO()
-        }*/
         this.state = newState
     }
 
@@ -297,14 +298,14 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     enum class State {
-        IDLE,// TODO ADD TRANSITING STATE
+        IDLE,
         DRAGGING, HOLDING_LEFT, HOLDING_RIGHT
     }
 }
 
-/////////////////////////////
-//////////Extensions/////////
-/////////////////////////////
+//////////////////////////////
+////////////Tools/////////////
+//////////////////////////////
 
 fun View.isTouchInside(eventX: Float): Boolean {
     val isBeforeLeft = eventX <= this.x + this.width
