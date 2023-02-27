@@ -3,13 +3,11 @@ package com.experimental.gestures.component
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnTouchListener
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -27,14 +25,11 @@ class SwipeLayout @JvmOverloads constructor(
 
     private var childView: View? = null
 
-    // Define initial state
     private var state = State.IDLE
 
     private var buttonWidthRatio = 0.25
 
     private var childRelativeXEvent = 0f
-
-    private var onActiveListener: OnActiveListener? = null
 
     private var onSwipeListener: ((Int) -> Unit?) = {}
 
@@ -43,13 +38,36 @@ class SwipeLayout @JvmOverloads constructor(
         const val LEFT = 1
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private val buttonTouchListener: OnTouchListener = OnTouchListener { v, event ->
-        handleTouch(event.action, event.x)
-    }
+    private var previousMotionEvent: Int = -1
 
     init {
         setup(ctx, attrs)
+    }
+
+    private var leftImageView = ImageView(ctx)
+    private var rightImageView = ImageView(ctx)
+
+    private fun setup(
+        context: Context, attrs: AttributeSet?
+    ) {
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SwipeLayout)
+        typedArray.recycle()
+    }
+
+    override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
+
+        event?.let {
+            handleTouch(event.action, event.x)
+        }
+
+        // If we return true, the child is not notified of (UP)event and click is not executed
+        // So we don´t want to execute onClick on child when we just dragged the view
+        if (event?.action == MotionEvent.ACTION_UP && previousMotionEvent != MotionEvent.ACTION_DOWN) {
+            return true
+        }
+
+        previousMotionEvent = event?.action ?: -1
+        return super.onInterceptTouchEvent(event)
     }
 
     override fun onAttachedToWindow() {
@@ -57,10 +75,6 @@ class SwipeLayout @JvmOverloads constructor(
         childView = children.single()
         addSideChildren()
     }
-
-    private var leftImageView = ImageView(ctx)
-    private var rightImageView = ImageView(ctx)
-
 
     private fun addSideChildren() {
 
@@ -78,14 +92,6 @@ class SwipeLayout @JvmOverloads constructor(
         // Add the left and right ImageViews to the ConstraintLayout
         this.addView(leftImageView, 0)
         this.addView(rightImageView, 0)
-    }
-
-    private fun setup(
-        context: Context, attrs: AttributeSet?
-    ) {
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SwipeLayout)
-        typedArray.recycle()
-        setOnTouchListener(buttonTouchListener)
     }
 
     private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
@@ -139,10 +145,6 @@ class SwipeLayout @JvmOverloads constructor(
                 resolveTransition()
             }
             Interaction.DRAGGED -> {
-                /*Log.i(
-                    "TAG",
-                    "reactDrag: childView?.width:${childView?.width} leftImageView.width: ${leftImageView.width} childView?.x: ${childView?.x}"
-                )*/
                 childView!!.x = eventX - childRelativeXEvent
                 setTrailingEffect()
                 setLeadingEffect()
@@ -179,32 +181,24 @@ class SwipeLayout @JvmOverloads constructor(
                         leftImageView.width(it)
                     })
                 }
-                /*childView?.accelerateOriginHorizontally(
-                    to = this.width
-                ) {
-                    childView?.accelerateOriginHorizontally(to = 0)
-                }*/
                 transitTo(State.IDLE)
+                onSwipeListener.invoke(RIGHT)
             }
             childView!!.x < -this.width * 0.45 -> { // complete swipe to left and return
-
                 acceleratedInterpolation(from = childView!!.x, to = -this.width, onValue = {
                     childView!!.x = it.toFloat()
-                    //rightImageView.width(it)
-                    //leftImageView.width(it)//TODO right
                     setLeadingEffect()
                 }) {
                     acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
                         childView!!.x = it.toFloat()
                         setLeadingEffect()
-                        //leftImageView.width(it) // TODO right
                     })
                 }
                 transitTo(State.IDLE)
+                onSwipeListener.invoke(LEFT)
             }
             childView!!.x > this.width * buttonWidthRatio -> { // shows left
-                acceleratedInterpolation(
-                    from = childView!!.x,
+                acceleratedInterpolation(from = childView!!.x,
                     to = this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
@@ -213,17 +207,12 @@ class SwipeLayout @JvmOverloads constructor(
                 transitTo(State.HOLDING_LEFT)
             }
             childView!!.x < -this.width * buttonWidthRatio -> { // shows right
-                acceleratedInterpolation(
-                    from = childView!!.x,
+                acceleratedInterpolation(from = childView!!.x,
                     to = -this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
                         setLeadingEffect()
-                        //leftImageView.width(it) //TODO
                     })
-                /*childView?.accelerateOriginHorizontally(
-                    to = -this.width * buttonWidthRatio
-                )*/
                 transitTo(State.HOLDING_RIGHT)
             }
             else -> { // dropped at the middle -- action canceled
