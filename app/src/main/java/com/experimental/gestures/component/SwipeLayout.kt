@@ -192,9 +192,11 @@ class SwipeLayout @JvmOverloads constructor(
                     childView!!.x = it.toFloat()
                     //rightImageView.width(it)
                     //leftImageView.width(it)//TODO right
+                    setLeadingEffect()
                 }) {
                     acceleratedInterpolation(from = childView!!.x, to = 0, onValue = {
                         childView!!.x = it.toFloat()
+                        setLeadingEffect()
                         //leftImageView.width(it) // TODO right
                     })
                 }
@@ -216,7 +218,8 @@ class SwipeLayout @JvmOverloads constructor(
                     to = -this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
-                        //leftImageView.width(it)
+                        setLeadingEffect()
+                        //leftImageView.width(it) //TODO
                     })
                 /*childView?.accelerateOriginHorizontally(
                     to = -this.width * buttonWidthRatio

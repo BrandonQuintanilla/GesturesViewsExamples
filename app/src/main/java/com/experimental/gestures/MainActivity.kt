@@ -40,5 +40,8 @@ class MainActivity : AppCompatActivity() {
         laySwipe.onRightClick {
             Log.i("TAG", "setupSwipe: onRightClick")
         }
+        /*layTest.setOnClickListener {
+            Log.i("TAG", "setupSwipe: onChildClick")
+        }*/
     }
 }
