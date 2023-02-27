@@ -10,10 +10,11 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
+import android.widget.RelativeLayout
 import androidx.core.view.children
 import com.experimental.gestures.R
 
@@ -24,7 +25,7 @@ import com.experimental.gestures.R
 
 class SwipeLayout @JvmOverloads constructor(
     ctx: Context, attrs: AttributeSet? = null
-) : ConstraintLayout(ctx, attrs) {
+) : FrameLayout(ctx, attrs) {
 
     private var childView: View? = null
 
@@ -49,92 +50,35 @@ class SwipeLayout @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         childView = children.single()
-        //addView(v,0)
         addSideChildren()
     }
 
+    private lateinit var leftImageView: ImageView
     private fun addSideChildren() {
+        //val layControls =
+        val layControls = RelativeLayout(context)
+        val layoutParamsView = RelativeLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        layoutParamsView.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+        addView(layControls, 0, layoutParamsView)
+
         // Create the left ImageView and set its image resource
-        val leftImageView = ImageView(context)
+        leftImageView = ImageView(context)
         leftImageView.setBackgroundColor(context.getColor(R.color.green))
         leftImageView.id = View.generateViewId();
         //        leftImageView.setImageResource(R.drawable.left_image)
 
         // Create the right ImageView and set its image resource
-        val rightImageView = ImageView(context)
-        leftImageView.setBackgroundColor(context.getColor(R.color.red))
-        rightImageView.id = View.generateViewId();
+        /* val rightImageView = ImageView(context)
+         leftImageView.setBackgroundColor(context.getColor(R.color.red))
+         rightImageView.id = View.generateViewId();*/
         //      rightImageView.setImageResource(R.drawable.right_image)
 
         // Add the left and right ImageViews to the ConstraintLayout
         this.addView(leftImageView)
-        this.addView(rightImageView)
-
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
-
-        // Set the constraints for the left ImageView
-        constraintSet.connect(
-            leftImageView.id,
-            ConstraintSet.START,
-            this.id,
-            ConstraintSet.START
-        )
-        constraintSet.connect(
-            leftImageView.id,
-            ConstraintSet.END,
-            childView!!.id,
-            ConstraintSet.START
-        )
-        constraintSet.connect(
-            leftImageView.id,
-            ConstraintSet.TOP,
-            childView!!.id,
-            ConstraintSet.TOP
-        )
-        constraintSet.connect(
-            leftImageView.id,
-            ConstraintSet.BOTTOM,
-            childView!!.id,
-            ConstraintSet.BOTTOM
-        )
-
-        // Set the constraints for the right ImageView
-        constraintSet.connect(
-            rightImageView.id,
-            ConstraintSet.START,
-            childView!!.id,
-            ConstraintSet.END
-        )
-        constraintSet.connect(
-            rightImageView.id,
-            ConstraintSet.END,
-            this.id,
-            ConstraintSet.END
-        )
-        constraintSet.connect(
-            rightImageView.id,
-            ConstraintSet.TOP,
-            childView!!.id,
-            ConstraintSet.TOP
-        )
-        constraintSet.connect(
-            rightImageView.id,
-            ConstraintSet.BOTTOM,
-            childView!!.id,
-            ConstraintSet.BOTTOM
-        )
-
-        // Set the constraints for the existing child view
-        constraintSet.connect(
-            childView!!.id,
-            ConstraintSet.END,
-            leftImageView.id,
-            ConstraintSet.START
-        )
-
-        // Apply the constraints to the ConstraintLayout
-        constraintSet.applyTo(this)
+        //this.addView(rightImageView)
     }
 
     private fun setup(
@@ -143,6 +87,7 @@ class SwipeLayout @JvmOverloads constructor(
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SwipeLayout)
         typedArray.recycle()
         setOnTouchListener(buttonTouchListener)
+        //addSideChildren()
     }
 
     private fun handleTouch(eventAction: Int, eventX: Float): Boolean {
@@ -151,53 +96,64 @@ class SwipeLayout @JvmOverloads constructor(
             return false
         }
 
-        val event = resolveEvent(eventAction, eventX)
-        Log.i(
-            "TAG",
-            "handleTouch: left:${childView?.left} right: ${childView?.right} x: ${childView?.x}"
-        )
+        val interaction = resolveInteraction(eventAction, eventX)
         when (state) {
             State.IDLE -> {
-                reactIdle(event, eventX)
+                reactIdle(interaction, eventX)
             }
             State.DRAGGING -> {
-                reactDrag(event, eventX)
+                reactDrag(interaction, eventX)
             }
             State.HOLDING_LEFT -> {
-                reactHoldingLeft(event, eventX)
+                reactHoldingLeft(interaction, eventX)
             }
             State.HOLDING_RIGHT -> {
-                reactHoldingRight(event, eventX)
+                reactHoldingRight(interaction, eventX)
             }
         }
         return true
     }
 
-    private fun reactIdle(event: Event, eventX: Float) {
-        when (event) {
-            Event.TOUCH_DOWN -> {
+    private fun reactIdle(interaction: Interaction, eventX: Float) {
+        when (interaction) {
+            Interaction.TOUCH_DOWN -> {
                 childRelativeXEvent = eventX
                 transitTo(State.DRAGGING)
             }
-            Event.TOUCH_UP -> Unit
-            Event.DRAGGED -> Unit
-            Event.SCROLLED -> Unit
-            Event.VOID -> Unit
+            Interaction.TOUCH_UP -> Unit
+            Interaction.DRAGGED -> Unit
+            Interaction.SCROLLED -> Unit
+            Interaction.VOID -> Unit
         }
     }
 
-    private fun reactDrag(event: Event, eventX: Float) {
-        when (event) {
-            Event.TOUCH_DOWN -> Unit
-            Event.TOUCH_UP -> {
+    private fun reactDrag(interaction: Interaction, eventX: Float) {
+        when (interaction) {
+            Interaction.TOUCH_DOWN -> Unit
+            Interaction.TOUCH_UP -> {
                 resolveTransition()
             }
-            Event.DRAGGED -> {
+            Interaction.DRAGGED -> {
+                Log.i(
+                    "TAG",
+                    "reactDrag: childView?.width:${childView?.width} leftImageView.width: ${leftImageView.width} childView?.x: ${childView?.x}"
+                )
                 childView!!.x = eventX - childRelativeXEvent
+                setTrailingEffect()
             }
-            Event.VOID -> Unit
-            Event.SCROLLED -> Unit
+            Interaction.VOID -> Unit
+            Interaction.SCROLLED -> Unit
         }
+    }
+
+    //TODO rename
+    private fun setTrailingEffect() {
+        leftImageView.visibility = View.VISIBLE
+        leftImageView.layoutParams = FrameLayout.LayoutParams(
+            childView!!.x.toInt(),
+            childView!!.height
+        )
+
     }
 
     private fun resolveTransition() {
@@ -237,29 +193,29 @@ class SwipeLayout @JvmOverloads constructor(
         }
     }
 
-    private fun reactHoldingLeft(event: Event, eventX: Float) {
-        when (event) {
-            Event.TOUCH_DOWN -> {
+    private fun reactHoldingLeft(interaction: Interaction, eventX: Float) {
+        when (interaction) {
+            Interaction.TOUCH_DOWN -> {
                 childRelativeXEvent = (eventX - this.width * buttonWidthRatio).toFloat()
                 transitTo(State.DRAGGING)
             }
-            Event.TOUCH_UP -> Unit
-            Event.DRAGGED -> Unit
-            Event.VOID -> Unit
-            Event.SCROLLED -> Unit
+            Interaction.TOUCH_UP -> Unit
+            Interaction.DRAGGED -> Unit
+            Interaction.VOID -> Unit
+            Interaction.SCROLLED -> Unit
         }
     }
 
-    private fun reactHoldingRight(event: Event, eventX: Float) {
-        when (event) {
-            Event.TOUCH_DOWN -> {
+    private fun reactHoldingRight(interaction: Interaction, eventX: Float) {
+        when (interaction) {
+            Interaction.TOUCH_DOWN -> {
                 childRelativeXEvent = (eventX + this.width * buttonWidthRatio).toFloat()
                 transitTo(State.DRAGGING)
             }
-            Event.TOUCH_UP -> Unit
-            Event.DRAGGED -> Unit
-            Event.VOID -> Unit
-            Event.SCROLLED -> Unit
+            Interaction.TOUCH_UP -> Unit
+            Interaction.DRAGGED -> Unit
+            Interaction.VOID -> Unit
+            Interaction.SCROLLED -> Unit
         }
     }
 
@@ -275,24 +231,24 @@ class SwipeLayout @JvmOverloads constructor(
 
 
     // View.onGenericMotionEvent(MotionEvent)
-    private fun resolveEvent(eventAction: Int, eventX: Float): Event {
+    private fun resolveInteraction(eventAction: Int, eventX: Float): Interaction {
         return when (eventAction) {
             MotionEvent.ACTION_DOWN -> {
-                Event.TOUCH_DOWN
+                Interaction.TOUCH_DOWN
             }
             MotionEvent.ACTION_UP -> {
-                Event.TOUCH_UP
+                Interaction.TOUCH_UP
             }
             MotionEvent.ACTION_MOVE -> {
-                Event.DRAGGED
+                Interaction.DRAGGED
             }
             else -> {
-                Event.VOID
+                Interaction.VOID
             }
         }
     }
 
-    enum class Event {
+    enum class Interaction {
         TOUCH_DOWN, TOUCH_UP, DRAGGED, VOID, SCROLLED
     }
 
