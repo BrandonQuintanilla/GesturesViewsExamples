@@ -54,29 +54,23 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     private lateinit var leftImageView: ImageView
+    private lateinit var rightImageView: ImageView
     private fun addSideChildren() {
-        val layControls = RelativeLayout(context)
-        val layoutParamsView = RelativeLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        layoutParamsView.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-        addView(layControls, 0, layoutParamsView)
 
         // Create the left ImageView and set its image resource
         leftImageView = ImageView(context)
         leftImageView.setBackgroundColor(context.getColor(R.color.green))
-        leftImageView.id = View.generateViewId();
-        //        leftImageView.setImageResource(R.drawable.left_image)
+        leftImageView.id = View.generateViewId()
 
         // Create the right ImageView and set its image resource
-        /* val rightImageView = ImageView(context)
-         leftImageView.setBackgroundColor(context.getColor(R.color.red))
-         rightImageView.id = View.generateViewId();*/
-        //      rightImageView.setImageResource(R.drawable.right_image)
+        //TODO rightImageView is not modified by dragging
+        rightImageView = ImageView(context)
+        rightImageView.setBackgroundColor(context.getColor(R.color.red))
+        rightImageView.id = View.generateViewId()
 
         // Add the left and right ImageViews to the ConstraintLayout
-        this.addView(leftImageView)
-        //this.addView(rightImageView)
+        this.addView(leftImageView, 0)
+        this.addView(rightImageView, 0)
     }
 
     private fun setup(
@@ -124,6 +118,8 @@ class SwipeLayout @JvmOverloads constructor(
             Interaction.VOID -> Unit
         }
     }
+
+
 
     private fun reactDrag(interaction: Interaction, eventX: Float) {
         when (interaction) {
