@@ -11,19 +11,14 @@ import com.experimental.gestures.R
 import com.experimental.gestures.github.library.SwipeLayout
 
 class MyActivity : AppCompatActivity() {
-    //private var sample1: SwipeLayout? = null
     private lateinit var sample1: SwipeLayout
     private lateinit var sample2: SwipeLayout
     private lateinit var sample3: SwipeLayout
 
-    //null, private  var sample2:SwipeLayout? = null, private  var sample3:SwipeLayout? = null
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
-
-//        SwipeLayout swipeLayout = (SwipeLayout)findViewById(R.id.godfather);
-//        swipeLayout.setDragEdge(SwipeLayout.DragEdge.Bottom); // Set in XML
 
         //sample1
         sample1 = findViewById<View>(R.id.sample1) as SwipeLayout
