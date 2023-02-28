@@ -3,6 +3,7 @@ package com.experimental.gestures
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.experimental.gestures.databinding.ActivityMainBinding
@@ -33,15 +34,19 @@ class MainActivity : AppCompatActivity() {
     private fun setupSwipe() = bind.apply {
         laySwipe.onSwipe { direction ->
             Log.i("TAG", "setupSwipe: onSwipe ${direction}")
+            Toast.makeText(applicationContext, "onSwipe ${direction}", Toast.LENGTH_LONG).show()
         }
         laySwipe.onLeftClick {
             Log.i("TAG", "setupSwipe: onLeftClick")
+            Toast.makeText(applicationContext, "onLeftClick", Toast.LENGTH_LONG).show()
         }
         laySwipe.onRightClick {
             Log.i("TAG", "setupSwipe: onRightClick")
+            Toast.makeText(applicationContext, "onRightClick", Toast.LENGTH_LONG).show()
         }
         layTest.setOnClickListener {
             Log.i("TAG", "setupSwipe: onChildClick")
+            Toast.makeText(applicationContext, "onChildClick", Toast.LENGTH_LONG).show()
         }
     }
 }

@@ -151,6 +151,7 @@ class SwipeLayout @JvmOverloads constructor(
             Interaction.TOUCH_DOWN -> Unit
             Interaction.TOUCH_UP -> {
                 resolveTransition()
+                //transitTo(State.IDLE) // TODO HOLDING LEFT RECOGNIZE anchor point
             }
             Interaction.DRAGGED -> {
                 childView!!.x = eventX - childAnchorPosition
