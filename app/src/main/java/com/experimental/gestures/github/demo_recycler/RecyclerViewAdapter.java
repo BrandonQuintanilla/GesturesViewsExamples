@@ -1,4 +1,4 @@
-package com.experimental.gestures.github.demo;
+package com.experimental.gestures.github.demo_recycler;
 
 import android.content.Context;
 import android.util.Log;

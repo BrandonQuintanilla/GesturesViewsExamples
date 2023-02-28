@@ -12,18 +12,23 @@
         android:theme="@style/Theme.Gestures"
         tools:targetApi="31">
         <activity
-            android:name=".github.demo.RecyclerViewExample"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:name=".github.demo_recycler.RecyclerViewExample"
+            android:exported="true">
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">
 
+        </activity>
+        <activity
+            android:name=".github.demo_plane.MyActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
