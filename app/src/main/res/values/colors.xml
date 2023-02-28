@@ -12,4 +12,8 @@
     <color name="c_02">#FFFFFFFF</color>
     <color name="c_03">#FFFFFFFF</color>
     <color name="c_04">#FFFFFFFF</color>
+
+    <color name="backgroundColor">#E8E8E0</color>
+    <color name="backgroundColorPress">#DBDBD3</color>
+
 </resources>
