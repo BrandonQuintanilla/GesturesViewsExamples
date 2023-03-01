@@ -95,6 +95,7 @@
         android:padding="10dp"
         android:background="@drawable/white"
         android:tag="Hover"
+        android:id="@+id/tv_item"
         android:text="TEXT TEXT TEXT"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

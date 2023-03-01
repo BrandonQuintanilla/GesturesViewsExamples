@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -22,16 +21,35 @@ class CustomSwipeAdapter(context: Context, objects: ArrayList<String>) :
     RecyclerSwipeAdapter<CustomSwipeAdapter.SimpleViewHolder?>() {
     class SimpleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var swipeLayout: SwipeLayout
+        var archive: View
+        var delete: View
+        var marginfier: View
+        var star: View
+        var trash: View
+        var tvItem: TextView
 
         init {
             swipeLayout = itemView.findViewById<View>(R.id.swipe) as SwipeLayout
-            itemView.setOnClickListener { view ->
+            archive = itemView.findViewById<View>(R.id.archive)
+            delete = itemView.findViewById<View>(R.id.delete)
+            marginfier = itemView.findViewById<View>(R.id.magnifier2)
+            star = itemView.findViewById<View>(R.id.star2)
+            trash = itemView.findViewById<View>(R.id.trash2)
+            tvItem = itemView.findViewById<TextView>(R.id.tv_item)
+            tvItem.setOnClickListener {
+                Toast.makeText(
+                    it.context,
+                    "onItemSelected: $adapterPosition",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            /*itemView.setOnClickListener { view ->
                 Toast.makeText(
                     view.context,
                     "onItemSelected: $adapterPosition",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
+            }*/
         }
     }
 
@@ -45,7 +63,8 @@ class CustomSwipeAdapter(context: Context, objects: ArrayList<String>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleViewHolder {
         val view: View =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_custom_github_swipe, parent, false)
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_custom_github_swipe, parent, false)
         return SimpleViewHolder(view)
     }
 
@@ -53,13 +72,20 @@ class CustomSwipeAdapter(context: Context, objects: ArrayList<String>) :
         val item = mDataset[position]
         viewHolder.swipeLayout.showMode = SwipeLayout.ShowMode.LayDown
         val starBottView: View = viewHolder.swipeLayout.findViewById(R.id.starbott)
-        viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left, viewHolder.swipeLayout.findViewById(R.id.bottom_wrapper))
-        viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.bottom_wrapper_2))
+        viewHolder.swipeLayout.addDrag(
+            SwipeLayout.DragEdge.Left,
+            viewHolder.swipeLayout.findViewById(R.id.bottom_wrapper)
+        )
+        viewHolder.swipeLayout.addDrag(
+            SwipeLayout.DragEdge.Right,
+            viewHolder.swipeLayout.findViewById(R.id.bottom_wrapper_2)
+        )
         viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Top, starBottView)
         viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Bottom, starBottView)
         viewHolder.swipeLayout.addSwipeListener(object : SimpleSwipeListener() {
             override fun onOpen(layout: SwipeLayout) {
-                Toast.makeText(mContext, "SWIPED", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(mContext, "SWIPED", Toast.LENGTH_SHORT).show()
+                Log.i("TAG", "onOpen SWIPED: ")
             }
         })
         viewHolder.swipeLayout.setOnDoubleClickListener { layout, surface ->
@@ -69,6 +95,55 @@ class CustomSwipeAdapter(context: Context, objects: ArrayList<String>) :
                 Toast.LENGTH_SHORT
             ).show()
         }
+
+        viewHolder.archive.setOnClickListener {
+            mItemManger.closeAllItems()
+            Toast.makeText(
+                mContext,
+                "Archive",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        viewHolder.delete.setOnClickListener {
+            mItemManger.closeAllItems()
+            Toast.makeText(
+                mContext,
+                "Delete",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        viewHolder.marginfier.setOnClickListener {
+            mItemManger.closeAllItems()
+            Toast.makeText(
+                mContext,
+                "Magnifier",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        viewHolder.star.setOnClickListener {
+            mItemManger.closeAllItems()
+            Toast.makeText(
+                mContext,
+                "Star",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        viewHolder.trash.setOnClickListener {
+            mItemManger.closeAllItems()
+            Toast.makeText(
+                mContext,
+                "Trash",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        viewHolder.tvItem.text = item
+        /*viewHolder.tvItem.setOnClickListener {
+            Toast.makeText(
+                mContext,
+                "tvItem",
+                Toast.LENGTH_SHORT
+            ).show()
+        }*/
 
         mItemManger.bind(viewHolder.itemView, position)
     }
