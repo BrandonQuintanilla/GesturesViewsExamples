@@ -967,9 +967,11 @@ public class SwipeLayout extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        //Log.i("TAG", "onTouchEvent onTouchEvent: event" + super.onTouchEvent(event));
-
-        if (!isSwipeEnabled()) return super.onTouchEvent(event);
+        if (!isSwipeEnabled()) {
+            boolean r = super.onTouchEvent(event);
+            Log.i("TAG", "onTouchEvent onTouchEvent: event 11 " + r);
+            return r;
+        }
 
         int action = event.getActionMasked();
         gestureDetector.onTouchEvent(event);
@@ -1000,7 +1002,10 @@ public class SwipeLayout extends FrameLayout {
                 mDragHelper.processTouchEvent(event);
         }
 
-        return super.onTouchEvent(event) || mIsBeingDragged || action == MotionEvent.ACTION_DOWN;
+        boolean rr = super.onTouchEvent(event) || mIsBeingDragged || action == MotionEvent.ACTION_DOWN;
+        Log.i("TAG", "onTouchEvent onTouchEvent: event 22 " + rr);
+
+        return rr;
     }
 
     public boolean isClickToClose() {

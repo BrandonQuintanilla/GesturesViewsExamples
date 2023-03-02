@@ -1,16 +1,17 @@
 package com.experimental.gestures.githubdemo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.experimental.gestures.R
 import com.experimental.gestures.github.demo_plane.MyActivity
 import com.experimental.gestures.github.library.SwipeLayout
+import com.experimental.gestures.recycler.CustomSwipeAdapterconstructor
 
-class GithubSwipeLayoutDemo : AppCompatActivity() {
+class GithubSwipeLayoutDemoActivity : AppCompatActivity() {
 
     private lateinit var sample1: SwipeLayout
 
@@ -20,6 +21,7 @@ class GithubSwipeLayoutDemo : AppCompatActivity() {
 
         setupSingleSwipe()
         setupSwipeRecycler()
+        setupCustomSwipeAdapter()
     }
 
     private fun setupSwipeRecycler() {
@@ -80,6 +82,13 @@ class GithubSwipeLayoutDemo : AppCompatActivity() {
         recycler.adapter = adap
     }
 
+    private fun setupCustomSwipeAdapter() {
+        val rvMain = findViewById<RecyclerView>(R.id.rv_main)
+        val swipeAdapter = CustomSwipeAdapterconstructor(this)
+        rvMain.adapter = swipeAdapter
+    }
+
+
     private fun setupSingleSwipe() {
         sample1 = findViewById<View>(R.id.sample1) as SwipeLayout
         sample1.showMode = SwipeLayout.ShowMode.PullOut
@@ -96,19 +105,27 @@ class GithubSwipeLayoutDemo : AppCompatActivity() {
         }
 
         sample1.getSurfaceView().setOnClickListener(View.OnClickListener {
-            Toast.makeText(this@GithubSwipeLayoutDemo, "Click on surface", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                this@GithubSwipeLayoutDemoActivity,
+                "Click on surface",
+                Toast.LENGTH_SHORT
+            )
                 .show()
             Log.d(MyActivity::class.java.name, "click on surface")
         })
         sample1.getSurfaceView().setOnLongClickListener(View.OnLongClickListener {
-            Toast.makeText(this@GithubSwipeLayoutDemo, "longClick on surface", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                this@GithubSwipeLayoutDemoActivity,
+                "longClick on surface",
+                Toast.LENGTH_SHORT
+            )
                 .show()
             Log.d(MyActivity::class.java.name, "longClick on surface")
             true
         })
         sample1.findViewById<View>(R.id.star2).setOnClickListener(View.OnClickListener {
             Toast.makeText(
-                this@GithubSwipeLayoutDemo,
+                this@GithubSwipeLayoutDemoActivity,
                 "Star",
                 Toast.LENGTH_SHORT
             ).show()
@@ -116,7 +133,7 @@ class GithubSwipeLayoutDemo : AppCompatActivity() {
 
         sample1.findViewById<View>(R.id.trash2).setOnClickListener(View.OnClickListener {
             Toast.makeText(
-                this@GithubSwipeLayoutDemo,
+                this@GithubSwipeLayoutDemoActivity,
                 "Trash Bin",
                 Toast.LENGTH_SHORT
             ).show()
@@ -124,7 +141,7 @@ class GithubSwipeLayoutDemo : AppCompatActivity() {
 
         sample1.findViewById<View>(R.id.magnifier2).setOnClickListener(View.OnClickListener {
             Toast.makeText(
-                this@GithubSwipeLayoutDemo,
+                this@GithubSwipeLayoutDemoActivity,
                 "Magnifier",
                 Toast.LENGTH_SHORT
             ).show()

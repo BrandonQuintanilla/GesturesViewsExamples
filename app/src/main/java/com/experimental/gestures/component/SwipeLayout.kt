@@ -71,15 +71,22 @@ class SwipeLayout @JvmOverloads constructor(
         }
 
         previousMotionEvent = event?.action ?: -1
-        return false
+        //return false
+        return state == State.DRAGGING
         //return super.onInterceptTouchEvent(event)
     }
 
-    /*
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        Log.i("TAG", "onInterceptTouchEvent onTouchEvent: event?.action:${event?.action} event.x:${event?.x}")
-        return super.onTouchEvent(event)
-    }*/
+        Log.i(
+            "TAG",
+            "onInterceptTouchEvent onTouchEvent: event?.action:${event?.action} event.x:${event?.x}"
+        )
+        event?.let {
+            handleTouch(event.action, event.x)
+        }
+        return true
+    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -285,7 +292,6 @@ class SwipeLayout @JvmOverloads constructor(
         this.state = newState
     }
 
-
     // View.onGenericMotionEvent(MotionEvent)
     private fun resolveInteraction(eventAction: Int, eventX: Float): Interaction {
         return when (eventAction) {
@@ -297,6 +303,9 @@ class SwipeLayout @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 Interaction.DRAGGED
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                Interaction.TOUCH_UP
             }
             else -> {
                 Interaction.VOID

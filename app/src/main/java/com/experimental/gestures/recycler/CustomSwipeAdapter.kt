@@ -1,15 +1,17 @@
 package com.experimental.gestures.recycler
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.experimental.gestures.databinding.CustomItemSwipBinding
 
 /**
  * Created by Brandon Quintanilla on Feb/27/2023
  */
-class CustomSwipeAdapterconstructor() :
+class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
     RecyclerView.Adapter<CustomSwipeAdapterconstructor.ViewHolder>() {
 
     val data = listOf("Item1", "Item2", "Item3", "Item4", "Item5", "Item6")
@@ -35,13 +37,17 @@ class CustomSwipeAdapterconstructor() :
         fun bind(s: String) {
             bind.tvMain.text = s
             bind.root.onLeftClick {
-                Log.i("TAG", "bind: onLeftClick")
+                Toast.makeText(ctx, "onLeftClick", Toast.LENGTH_SHORT).show()
             }
             bind.root.onRightClick {
-                Log.i("TAG", "bind: onRightClick")
+                Toast.makeText(ctx, "onRightClick", Toast.LENGTH_SHORT).show()
             }
             bind.root.onSwipe {
-                Log.i("TAG", "bind: onSwipe")
+                Toast.makeText(ctx, "onSwipe", Toast.LENGTH_SHORT).show()
+            }
+
+            bind.tvMain.setOnClickListener {
+                Toast.makeText(ctx, "tvMain click", Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -27,12 +27,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCustomSwipeAdapter() {
-        val swipeAdapter = CustomSwipeAdapterconstructor()
+        val swipeAdapter = CustomSwipeAdapterconstructor(this)
         bind.rvMain.adapter = swipeAdapter
-        //bind.rvMain.onDragEvent()
         bind.rvMain
-        //bind.rvMain.onInterceptTouchEvent()
-        //bind.rvMain.requestDisallowInterceptTouchEvent(false)
     }
 
     private fun setupRecycler() {
