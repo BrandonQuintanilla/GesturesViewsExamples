@@ -15,9 +15,21 @@ import com.experimental.gestures.databinding.CustomItemSwipBinding
 class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
     RecyclerView.Adapter<CustomSwipeAdapterconstructor.ViewHolder>() {
 
+    var mShownLayouts: HashSet<SwipeLayout> = HashSet()
+
     private val data = listOf(
-        "Item1", "Item2", "Item3", "Item4", "Item5", "Item6"
-        ,"Item1", "Item2", "Item3", "Item4", "Item5", "Item6"
+        "Item1",
+        "Item2",
+        "Item3",
+        "Item4",
+        "Item5",
+        "Item6",
+        "Item1",
+        "Item2",
+        "Item3",
+        "Item4",
+        "Item5",
+        "Item6"
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -30,12 +42,19 @@ class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(data[position])
     }
-
-    fun deleteItem(position: Int) {
-        //TODO
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        recyclerView.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            onScroll()
+        }
     }
 
-    var mShownLayouts: HashSet<SwipeLayout> = HashSet()
+    fun onScroll() {
+        this.mShownLayouts.forEach {
+            it.closeProgrammatically()
+        }
+    }
+
     fun closeAllExcept(target: SwipeLayout) {
         this.mShownLayouts.forEach {
             if (it != target) {
@@ -43,6 +62,7 @@ class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
             }
         }
     }
+
 
     inner class ViewHolder(private val bind: CustomItemSwipBinding) :
         RecyclerView.ViewHolder(bind.root) {

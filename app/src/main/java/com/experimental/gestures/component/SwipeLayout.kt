@@ -73,7 +73,7 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     fun closeProgrammatically() {
-        if (state != State.DRAGGING) {
+        if (state != State.DRAGGING && (state == State.HOLDING_RIGHT || state == State.HOLDING_LEFT)) {
             returnToIdle()
         }
     }
@@ -248,8 +248,7 @@ class SwipeLayout @JvmOverloads constructor(
                 onSwipeListener.invoke(LEFT)
             }
             childView!!.x > this.width * buttonWidthRatio -> { // shows left
-                acceleratedInterpolation(
-                    from = childView!!.x,
+                acceleratedInterpolation(from = childView!!.x,
                     to = this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
@@ -258,8 +257,7 @@ class SwipeLayout @JvmOverloads constructor(
                 transitTo(State.HOLDING_LEFT)
             }
             childView!!.x < -this.width * buttonWidthRatio -> { // shows right
-                acceleratedInterpolation(
-                    from = childView!!.x,
+                acceleratedInterpolation(from = childView!!.x,
                     to = -this.width * buttonWidthRatio,
                     onValue = {
                         childView!!.x = it.toFloat()
@@ -353,11 +351,7 @@ class SwipeLayout @JvmOverloads constructor(
     }
 
     enum class State {
-        IDLE,
-        DOWN,
-        DRAGGING,
-        HOLDING_LEFT,
-        HOLDING_RIGHT
+        IDLE, DOWN, DRAGGING, HOLDING_LEFT, HOLDING_RIGHT
     }
 }
 
