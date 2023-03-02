@@ -5,8 +5,7 @@
     android:layout_height="wrap_content"
     android:focusableInTouchMode="true"
     android:clickable="true"
-    android:focusable="true"
-    android:background="#6475D5">
+    android:focusable="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,10 +15,12 @@
             android:id="@+id/tv_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="15dp"
-            android:layout_marginVertical="15dp"
+            android:layout_marginHorizontal="0dp"
+            android:layout_marginVertical="0dp"
+            android:paddingVertical="18dp"
             android:textColor="@color/black"
             android:textStyle="bold"
+            android:background="#6475D5"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

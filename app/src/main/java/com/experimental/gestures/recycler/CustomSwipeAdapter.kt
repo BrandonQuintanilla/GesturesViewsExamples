@@ -46,7 +46,7 @@ class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
                 Toast.makeText(ctx, "onSwipe", Toast.LENGTH_SHORT).show()
             }
 
-            bind.tvMain.setOnClickListener {
+            bind.root.setOnClickListener {
                 Toast.makeText(ctx, "tvMain click", Toast.LENGTH_SHORT).show()
             }
         }

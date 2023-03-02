@@ -3,6 +3,7 @@ package com.experimental.gestures.component
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
@@ -58,7 +59,7 @@ class SwipeLayout @JvmOverloads constructor(
 
     override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
 
-        Log.i("TAG", "onInterceptTouchEvent: event?.action:${event?.action} event.x:${event?.x}")
+        //Log.i("TAG", "onInterceptTouchEvent: event?.action:${event?.action} event.x:${event?.x}")
 
         event?.let {
             handleTouch(event.action, event.x)
@@ -66,25 +67,26 @@ class SwipeLayout @JvmOverloads constructor(
 
         // If we return true, the child is not notified of (UP)event and click is not executed
         // So we don´t want to execute onClick on child when the view have just been dragged
-        if (event?.action == MotionEvent.ACTION_UP && previousMotionEvent != MotionEvent.ACTION_DOWN) {
-            return true
+        if (event?.action == MotionEvent.ACTION_UP && previousMotionEvent == MotionEvent.ACTION_DOWN) {
+            return false
+            //super.onInterceptTouchEvent(event)
         }
 
         previousMotionEvent = event?.action ?: -1
-        //return false
-        return state == State.DRAGGING
-        //return super.onInterceptTouchEvent(event)
+        return state == State.DOWN
     }
 
-
+    /***
+     * The performClick event is executed when the DOWN state interacts with a UP action
+     */
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        Log.i(
-            "TAG",
-            "onInterceptTouchEvent onTouchEvent: event?.action:${event?.action} event.x:${event?.x}"
-        )
+
+        previousMotionEvent = event?.action ?: -1
         event?.let {
             handleTouch(event.action, event.x)
         }
+
         return true
     }
 
@@ -115,9 +117,13 @@ class SwipeLayout @JvmOverloads constructor(
         }
 
         val interaction = resolveInteraction(eventAction, eventX)
+        Log.i("interaction", "handleTouch II: $interaction $state  $eventAction")
         when (state) {
             State.IDLE -> {
                 reactIdle(interaction, eventX)
+            }
+            State.DOWN -> {
+                reactIDown(interaction, eventX)
             }
             State.DRAGGING -> {
                 reactDrag(interaction, eventX)
@@ -129,14 +135,57 @@ class SwipeLayout @JvmOverloads constructor(
                 reactHoldingRight(interaction, eventX)
             }
         }
+        Log.i("interaction", "handleTouch FF: $interaction $state")
         return
     }
 
+    var lastX = -1f
+
+    private fun reactIDown(interaction: Interaction, eventX: Float) {
+        //Log.i("TAG", "handleTouchSTATE: $interaction  $state")
+        when (interaction) {
+            Interaction.TOUCH_DOWN -> {
+                lastX = eventX
+                /*val deltaX = lastX - eventX
+                lastX = eventX
+                Log.i("TAG", "handleTouchSTATE DOWN: $lastX - $eventX")
+                if (deltaX < 0.01f && deltaX > -0.01f) {
+                    transitTo(State.DRAGGING)
+                } else {
+                    transitTo(State.IDLE)
+                }*/
+            }
+            Interaction.TOUCH_UP -> {
+                //TODO perform click on child
+                //childView?.performClick()
+                this.performClick()
+                transitTo(State.IDLE)
+            }
+            Interaction.DRAGGED -> {
+                val deltaX = lastX - eventX
+                lastX = eventX
+                Log.i("interaction", "handleTouch DRAGGEDdelta: $deltaX ")
+                //Log.i("TAG", "handleTouchSTATE DRAG: $lastX - $eventX")
+
+                if (-0.0001f < deltaX && deltaX < 0.0001f) {
+                    transitTo(State.IDLE)
+                } else {
+                    transitTo(State.DRAGGING)
+                }
+            }
+            Interaction.SCROLLED -> Unit
+            Interaction.VOID -> Unit
+        }
+        //Log.i("TAG", "handleTouchSTATE: $interaction  $state")
+    }
+
     private fun reactIdle(interaction: Interaction, eventX: Float) {
+        //Log.i("interaction", "handleTouchSTATE IDLE: $interaction ")
         when (interaction) {
             Interaction.TOUCH_DOWN -> {
                 childAnchorPosition = eventX
-                transitTo(State.DRAGGING)
+                //transitTo(State.DRAGGING)
+                transitTo(State.DOWN)
             }
             Interaction.TOUCH_UP -> Unit
             Interaction.DRAGGED -> Unit
@@ -319,7 +368,10 @@ class SwipeLayout @JvmOverloads constructor(
 
     enum class State {
         IDLE,
-        DRAGGING, HOLDING_LEFT, HOLDING_RIGHT
+        DOWN,
+        DRAGGING,
+        HOLDING_LEFT,
+        HOLDING_RIGHT
     }
 }
 
