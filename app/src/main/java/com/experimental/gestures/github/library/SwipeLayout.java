@@ -958,7 +958,7 @@ public class SwipeLayout extends FrameLayout {
                 mDragHelper.processTouchEvent(ev);
         }
 
-        Log.i("TAG", "onTouchEvent onInterceptTouchEvent: 4 " +mIsBeingDragged);
+        Log.i("TAG", "onTouchEvent onInterceptTouchEvent: 4 " + mIsBeingDragged);
         return mIsBeingDragged;
     }
 
@@ -967,7 +967,7 @@ public class SwipeLayout extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        Log.i("TAG", "onTouchEvent onTouchEvent: event" + event.getAction() + " " + event.getX());
+        //Log.i("TAG", "onTouchEvent onTouchEvent: event" + super.onTouchEvent(event));
 
         if (!isSwipeEnabled()) return super.onTouchEvent(event);
 
