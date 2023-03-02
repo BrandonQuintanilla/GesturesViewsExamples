@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -146,7 +147,7 @@ public class SwipeLayout extends FrameLayout {
          * Called in onInterceptTouchEvent Determines if this swipe event should
          * be denied Implement this interface if you are using views with swipe
          * gestures As a child of SwipeLayout
-         * 
+         *
          * @return true deny false allow
          */
         boolean shouldDenySwipe(MotionEvent ev);
@@ -904,14 +905,19 @@ public class SwipeLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+        Log.i("TAG", "onTouchEvent onInterceptTouchEvent: event" + ev.getAction() + " " + ev.getX());
         if (!isSwipeEnabled()) {
+            Log.i("TAG", "onTouchEvent onInterceptTouchEvent: 1 false");
             return false;
         }
         if (mClickToClose && getOpenStatus() == Status.Open && isTouchOnSurface(ev)) {
+            Log.i("TAG", "onTouchEvent onInterceptTouchEvent: 2 true");
             return true;
         }
         for (SwipeDenier denier : mSwipeDeniers) {
             if (denier != null && denier.shouldDenySwipe(ev)) {
+                Log.i("TAG", "onTouchEvent onInterceptTouchEvent: 3 false");
                 return false;
             }
         }
@@ -951,6 +957,8 @@ public class SwipeLayout extends FrameLayout {
             default://handle other action, such as ACTION_POINTER_DOWN/UP
                 mDragHelper.processTouchEvent(ev);
         }
+
+        Log.i("TAG", "onTouchEvent onInterceptTouchEvent: 4 " +mIsBeingDragged);
         return mIsBeingDragged;
     }
 
@@ -958,6 +966,9 @@ public class SwipeLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        Log.i("TAG", "onTouchEvent onTouchEvent: event" + event.getAction() + " " + event.getX());
+
         if (!isSwipeEnabled()) return super.onTouchEvent(event);
 
         int action = event.getActionMasked();
