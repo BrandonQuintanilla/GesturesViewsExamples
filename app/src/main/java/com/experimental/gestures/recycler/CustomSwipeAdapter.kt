@@ -15,7 +15,10 @@ import com.experimental.gestures.databinding.CustomItemSwipBinding
 class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
     RecyclerView.Adapter<CustomSwipeAdapterconstructor.ViewHolder>() {
 
-    val data = listOf("Item1", "Item2", "Item3", "Item4", "Item5", "Item6")
+    private val data = listOf(
+        "Item1", "Item2", "Item3", "Item4", "Item5", "Item6"
+        ,"Item1", "Item2", "Item3", "Item4", "Item5", "Item6"
+    )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val bind = CustomItemSwipBinding.inflate(LayoutInflater.from(parent.context), parent, false)

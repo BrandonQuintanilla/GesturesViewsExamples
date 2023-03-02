@@ -45,18 +45,9 @@ class SwipeLayout @JvmOverloads constructor(
     private var previousMotionEvent: Int = -1
 
     private var leftImageView = ImageView(ctx)
+
     private var rightImageView = ImageView(ctx)
 
-    init {
-        setup(ctx, attrs)
-    }
-
-    private fun setup(
-        context: Context, attrs: AttributeSet?
-    ) {
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SwipeLayout)
-        typedArray.recycle()
-    }
 
     override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
 
@@ -103,6 +94,12 @@ class SwipeLayout @JvmOverloads constructor(
         super.onAttachedToWindow()
         childView = children.single()
         addSideChildren()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        removeView(leftImageView)
+        removeView(rightImageView)
     }
 
     private fun addSideChildren() {
