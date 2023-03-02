@@ -35,6 +35,7 @@ class SwipeLayout @JvmOverloads constructor(
     private var childAnchorPosition = 0f
 
     private var onSwipeListener: ((Int) -> Unit?) = {}
+    private var onOpenStarted: (() -> Unit?) = {}
 
     companion object {
         const val RIGHT = 1
@@ -59,17 +60,8 @@ class SwipeLayout @JvmOverloads constructor(
 
     override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
 
-        //Log.i("TAG", "onInterceptTouchEvent: event?.action:${event?.action} event.x:${event?.x}")
-
         event?.let {
             handleTouch(event.action, event.x)
-        }
-
-        // If we return true, the child is not notified of (UP)event and click is not executed
-        // So we don´t want to execute onClick on child when the view have just been dragged
-        if (event?.action == MotionEvent.ACTION_UP && previousMotionEvent == MotionEvent.ACTION_DOWN) {
-            return false
-            //super.onInterceptTouchEvent(event)
         }
 
         previousMotionEvent = event?.action ?: -1
@@ -81,13 +73,30 @@ class SwipeLayout @JvmOverloads constructor(
      */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-
         previousMotionEvent = event?.action ?: -1
         event?.let {
             handleTouch(event.action, event.x)
         }
 
         return true
+    }
+
+    fun closeProgrammatically() {
+        if (state != State.DRAGGING) {
+            returnToIdle()
+        }
+    }
+
+    private fun returnToIdle() {
+        transitTo(State.IDLE)
+        acceleratedInterpolation(
+            from = childView!!.x,
+            to = 0,
+            onValue = {
+                childView!!.x = it.toFloat()
+                leftImageView.width(it)
+                updateRightViewParams()
+            })
     }
 
     override fun onAttachedToWindow() {
@@ -142,49 +151,33 @@ class SwipeLayout @JvmOverloads constructor(
     var lastX = -1f
 
     private fun reactIDown(interaction: Interaction, eventX: Float) {
-        //Log.i("TAG", "handleTouchSTATE: $interaction  $state")
         when (interaction) {
             Interaction.TOUCH_DOWN -> {
                 lastX = eventX
-                /*val deltaX = lastX - eventX
-                lastX = eventX
-                Log.i("TAG", "handleTouchSTATE DOWN: $lastX - $eventX")
-                if (deltaX < 0.01f && deltaX > -0.01f) {
-                    transitTo(State.DRAGGING)
-                } else {
-                    transitTo(State.IDLE)
-                }*/
             }
             Interaction.TOUCH_UP -> {
-                //TODO perform click on child
-                //childView?.performClick()
                 this.performClick()
                 transitTo(State.IDLE)
             }
             Interaction.DRAGGED -> {
                 val deltaX = lastX - eventX
                 lastX = eventX
-                Log.i("interaction", "handleTouch DRAGGEDdelta: $deltaX ")
-                //Log.i("TAG", "handleTouchSTATE DRAG: $lastX - $eventX")
-
                 if (-0.0001f < deltaX && deltaX < 0.0001f) {
                     transitTo(State.IDLE)
                 } else {
                     transitTo(State.DRAGGING)
+                    this.onOpenStarted.invoke()
                 }
             }
             Interaction.SCROLLED -> Unit
             Interaction.VOID -> Unit
         }
-        //Log.i("TAG", "handleTouchSTATE: $interaction  $state")
     }
 
     private fun reactIdle(interaction: Interaction, eventX: Float) {
-        //Log.i("interaction", "handleTouchSTATE IDLE: $interaction ")
         when (interaction) {
             Interaction.TOUCH_DOWN -> {
                 childAnchorPosition = eventX
-                //transitTo(State.DRAGGING)
                 transitTo(State.DOWN)
             }
             Interaction.TOUCH_UP -> Unit
@@ -210,6 +203,10 @@ class SwipeLayout @JvmOverloads constructor(
 
     fun onSwipe(l: (Int) -> Unit) {
         this.onSwipeListener = l
+    }
+
+    fun onOpenStarted(l: () -> Unit) {
+        this.onOpenStarted = l
     }
 
     private fun reactDrag(interaction: Interaction, eventX: Float) {
@@ -274,15 +271,7 @@ class SwipeLayout @JvmOverloads constructor(
                 transitTo(State.HOLDING_RIGHT)
             }
             else -> { // dropped at the middle -- action canceled
-                transitTo(State.IDLE)
-                acceleratedInterpolation(
-                    from = childView!!.x,
-                    to = 0,
-                    onValue = {
-                        childView!!.x = it.toFloat()
-                        leftImageView.width(it)
-                        updateRightViewParams()
-                    })
+                returnToIdle()
             }
         }
     }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.experimental.gestures.component.SwipeLayout
 import com.experimental.gestures.databinding.CustomItemSwipBinding
 
 /**
@@ -31,10 +32,21 @@ class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
         //TODO
     }
 
+    var mShownLayouts: HashSet<SwipeLayout> = HashSet()
+    fun closeAllExcept(target: SwipeLayout) {
+        this.mShownLayouts.forEach {
+            if (it != target) {
+                it.closeProgrammatically()
+            }
+        }
+    }
+
     inner class ViewHolder(private val bind: CustomItemSwipBinding) :
         RecyclerView.ViewHolder(bind.root) {
 
         fun bind(s: String) {
+            mShownLayouts.add(bind.root)
+            Log.i("TAG", "bind: ${mShownLayouts.size}")
             bind.tvMain.text = s
             bind.root.onLeftClick {
                 Toast.makeText(ctx, "onLeftClick", Toast.LENGTH_SHORT).show()
@@ -44,6 +56,10 @@ class CustomSwipeAdapterconstructor constructor(val ctx: Context) :
             }
             bind.root.onSwipe {
                 Toast.makeText(ctx, "onSwipe", Toast.LENGTH_SHORT).show()
+            }
+
+            bind.root.onOpenStarted {
+                closeAllExcept(bind.root)
             }
 
             bind.root.setOnClickListener {
